@@ -1,0 +1,9 @@
+[package]
+name = "achiever"
+edition = "2021"
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+
+[lib]
