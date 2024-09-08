@@ -18,44 +18,68 @@ pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: us
     buffer_pos: BufferMarker<BUFFER_SIZE>,
 
     directions: Option<Vec<u8>>,
-    spooky_ghost: PhantomData<STATE>,
+    _spooky_ghost: PhantomData<STATE>,
 }
 
 impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
     AgentSession<'agent, REWARD, STATE, BUFFER_SIZE>
 {
-    pub(crate) fn with_body(body: &'agent Body) -> Self {
-        Self {
-            goal: Goal::None,
-            body,
-            data_buf: [0u8; BUFFER_SIZE],
-            buffer_pos: BufferMarker::default(),
-            spooky_ghost: PhantomData,
-            directions: None
-        }
-    }
-
-    pub fn set_goal(&mut self, goal: Goal<REWARD>) {
-        self.goal = goal
+    pub fn builder() -> Builder<'agent, REWARD, BUFFER_SIZE> {
+        Builder::default()
     }
 }
 
-impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> AgentSession<'agent, REWARD, InReview, BUFFER_SIZE> {
+impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
+    AgentSession<'agent, REWARD, InReview, BUFFER_SIZE>
+{
     pub fn get_directions(&self) -> Option<&[u8]> {
         self.directions.as_deref()
     }
 }
 
-/// AgentSessionFactory will create a new agent session from a Body's reference. The STATE of this
+/// Builder will create a new agent session from a Body's reference. The STATE of this
 /// AgentSession will always be untrained. Only when receiving a new Agent back from the simulation
 /// server will we receive an agent tagged as Trained. Untrained agents do not have access to the
 /// directions bytes, preventing them from being runnable
-pub struct AgentSessionFactory;
-impl AgentSessionFactory {
-    pub fn create<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>(
-        body: &'agent Body,
-    ) -> AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE> {
-        AgentSession::with_body(body)
+pub struct Builder<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> {
+    goal: Option<Goal<REWARD>>,
+    body: Option<&'agent Body>,
+}
+
+impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Default
+    for Builder<'agent, REWARD, BUFFER_SIZE>
+{
+    fn default() -> Self {
+        Self {
+            goal: None,
+            body: None,
+        }
+    }
+}
+
+impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Builder<'agent, REWARD, BUFFER_SIZE> {
+    pub fn with_goal(mut self, goal: Goal<REWARD>) -> Self {
+        self.goal = Some(goal);
+        self
+    }
+
+    pub fn with_body(mut self, body: &'agent Body) -> Self {
+        self.body = Some(body);
+        self
+    }
+
+    pub fn build(self) -> Option<AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>> {
+        match (self.goal, self.body) {
+            (Some(goal), Some(body)) => Some(AgentSession {
+                goal,
+                body,
+                data_buf: [0u8; BUFFER_SIZE],
+                buffer_pos: BufferMarker::default(),
+                directions: None,
+                _spooky_ghost: PhantomData,
+            }),
+            _ => None,
+        }
     }
 }
 

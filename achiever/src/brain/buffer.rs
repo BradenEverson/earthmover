@@ -12,4 +12,3 @@ impl<const BUFFER_SIZE: usize> BufferMarker<BUFFER_SIZE> {
         }
     }
 }
-

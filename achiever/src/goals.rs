@@ -1,8 +1,7 @@
-
 /// Goals will be a modular abstraction over anything that we want the agent to do. It will be
 /// modular as this REWARD can be anything from a boolean to a dynamic reward type. It could be the
 /// reading from one or many peripherals. I think we should have some sort of exposed breadboard
-/// parts on the machine to include these dynamic peripherals. 
+/// parts on the machine to include these dynamic peripherals.
 ///
 ///
 /// For example, we could hook the agent up with a fire sensor, the Goal in this case would be Goal::Maximum and
