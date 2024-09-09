@@ -1,24 +1,52 @@
-name: Rust
+name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
-
-env:
-  CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  format:
+    runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
-    - name: Clippy
-      run: cargo clippy --verbose
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update nightly && rustup default nightly
+      - name: Install rustfmt
+        run: rustup component add rustfmt
+      - run: cargo fmt -- --check
+
+  lint:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update stable && rustup default stable
+      - name: Install clippy
+        run: rustup component add clippy
+      - run: cargo clippy --all-features -- --deny warnings
+
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update stable && rustup default stable
+      - run: cargo test --all-features
+
+  test-examples:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update stable && rustup default stable
+      - run: cargo test --all-features --examples
+
+  docs:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update stable && rustup default stable
+      - run: cargo doc
