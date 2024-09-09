@@ -13,6 +13,9 @@ pub mod outputs;
 /// could maybe also do a graph like structure
 #[derive(Default)]
 pub struct Body {
+    /// The root (can be thought of as the base hardware). If a peripheral is added without being
+    /// linked with another, root points to it
+    pub root: Vec<PeripheralKey>,
     /// The dependency graph of all Peripherals
     pub peripheral_graph: SlotMap<PeripheralKey, PeripheralNode>,
 }
@@ -20,12 +23,20 @@ pub struct Body {
 impl Body {
     /// Returns all input nodes
     pub fn inputs(&self) -> Vec<&PeripheralNode> {
-        self.peripheral_graph.iter().filter(|(_, node)| node.peripheral.is_input()).map(|(_, node)| node).collect::<Vec<_>>()
+        self.peripheral_graph
+            .iter()
+            .filter(|(_, node)| node.peripheral.is_input())
+            .map(|(_, node)| node)
+            .collect::<Vec<_>>()
     }
 
     /// Returns all output nodes
     pub fn outputs(&self) -> Vec<&PeripheralNode> {
-        self.peripheral_graph.iter().filter(|(_, node)| node.peripheral.is_output()).map(|(_, node)| node).collect::<Vec<_>>()
+        self.peripheral_graph
+            .iter()
+            .filter(|(_, node)| node.peripheral.is_output())
+            .map(|(_, node)| node)
+            .collect::<Vec<_>>()
     }
 }
 
@@ -58,7 +69,49 @@ pub struct PeripheralNode {
     pub points_to: Option<Vec<PeripheralKey>>,
 }
 
+impl Into<PeripheralNode> for Peripheral {
+    fn into(self) -> PeripheralNode {
+        PeripheralNode {
+            peripheral: self,
+            points_to: None,
+        }
+    }
+}
+
 new_key_type! {
     /// The peripheral's ID
     pub struct PeripheralKey;
+}
+
+/// Builder for a Body
+pub struct Builder {
+    root: Vec<PeripheralKey>,
+    graph: SlotMap<PeripheralKey, PeripheralNode>,
+}
+
+impl Builder {
+    /// Adds a node to the root
+    pub fn with_node(mut self, node: Peripheral) -> Self {
+        let id = self.graph.insert(node.into());
+        self.root.push(id);
+        self
+    }
+
+    /// Adds a node that's connected to another
+    pub fn add_node_to(&mut self, node: Peripheral, connected_to: PeripheralKey) {
+        let id = self.graph.insert(node.into());
+        if let Some(nodes) = &mut self.graph[connected_to].points_to {
+            nodes.push(id)
+        } else {
+            self.graph[connected_to].points_to = Some(vec![id]);
+        }
+    }
+
+    /// Constructs a body from a nodeset
+    pub fn build(self) -> Body {
+        Body {
+            root: self.root,
+            peripheral_graph: self.graph,
+        }
+    }
 }
