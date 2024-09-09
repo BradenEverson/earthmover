@@ -1,3 +1,5 @@
+//! Defining what a goal can be
+
 /// Goals will be a modular abstraction over anything that we want the agent to do. It will be
 /// modular as this REWARD can be anything from a boolean to a dynamic reward type. It could be the
 /// reading from one or many peripherals. I think we should have some sort of exposed breadboard
@@ -9,14 +11,18 @@
 /// the simulation would become aware of areas of higher flame concentration and infer to go close
 /// to these sources.
 pub enum Goal<REWARD: Rewardable> {
+    /// Maximize this Reward's value
     Maximize(REWARD),
+    /// Minimize this Reward's value
     Minimize(REWARD),
+    /// No goal
     None,
 }
 
 /// Basic implementations of reward function for primitive types that make sense
 ///
 pub trait Rewardable {
+    /// Returns an implementation's 'reward value' as an f64
     fn to_reward(&self) -> f64;
 }
 

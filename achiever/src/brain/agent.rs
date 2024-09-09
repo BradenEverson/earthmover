@@ -1,10 +1,14 @@
+//! An Agent's behavior, session states, and builder
+
 use std::marker::PhantomData;
 
 use crate::goals::{Goal, Rewardable};
 
 use super::buffer::BufferMarker;
 
+/// TypeState for a newly untrained session
 pub struct Untrained;
+/// TypeState for the type of agent session that is received after training
 pub struct InReview;
 
 /// The agent will hold both the current goal of the system and a reference to the actual hardware
@@ -24,6 +28,7 @@ pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: us
 impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
     AgentSession<'agent, REWARD, STATE, BUFFER_SIZE>
 {
+    /// Creates a new builder for an agent's session
     pub fn builder() -> Builder<'agent, REWARD, BUFFER_SIZE> {
         Builder::default()
     }
@@ -32,6 +37,7 @@ impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
 impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
     AgentSession<'agent, REWARD, InReview, BUFFER_SIZE>
 {
+    /// Gets the directions of a newly trained Agent
     pub fn get_directions(&self) -> Option<&[u8]> {
         self.directions.as_deref()
     }
@@ -58,16 +64,19 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Default
 }
 
 impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Builder<'agent, REWARD, BUFFER_SIZE> {
+    /// Set an agent's goal
     pub fn with_goal(mut self, goal: Goal<REWARD>) -> Self {
         self.goal = Some(goal);
         self
     }
 
+    /// Set an agent's body
     pub fn with_body(mut self, body: &'agent Body) -> Self {
         self.body = Some(body);
         self
     }
 
+    /// Build a fully configured `AgentSession`
     pub fn build(self) -> Option<AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>> {
         match (self.goal, self.body) {
             (Some(goal), Some(body)) => Some(AgentSession {
