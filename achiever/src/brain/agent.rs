@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 
 use crate::goals::{Goal, Rewardable};
 
-use super::buffer::BufferMarker;
+use super::buffer::DataBuffer;
 
 /// TypeState for a newly untrained session
 pub struct Untrained;
@@ -16,12 +16,15 @@ pub struct InReview;
 /// body, and data buf will all be sent to the remote simulation engine to before parralellized RL
 /// The response will then be a finished AgentSession that can be attempted to run in the field!
 pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize> {
+    /// The goal of the agent
     goal: Goal<REWARD>,
+    /// A reference to the agent's hardware
     body: &'agent Body,
-    data_buf: [u8; BUFFER_SIZE],
-    buffer_pos: BufferMarker<BUFFER_SIZE>,
-
+    /// The data collection buffer
+    buffer: DataBuffer<BUFFER_SIZE>,
+    /// Instruction sets on completed training
     directions: Option<Vec<u8>>,
+    /// PhantomData for state :)
     _spooky_ghost: PhantomData<STATE>,
 }
 
@@ -31,6 +34,25 @@ impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
     /// Creates a new builder for an agent's session
     pub fn builder() -> Builder<'agent, REWARD, BUFFER_SIZE> {
         Builder::default()
+    }
+
+    /// Gets the current reward of the agent session
+    pub fn get_reward(&self) -> Option<f64> {
+        self.goal.evaluate()
+    }
+
+    /// Returns a reference to the agent's hardware
+    pub fn get_body(&self) -> &Body {
+        self.body
+    }
+}
+
+impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
+    AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>
+{
+    /// Adds a slice of data to the buffer, if that slice is too large `None` is returned
+    pub fn add_data(&mut self, buf: &[u8]) -> Option<()> {
+        self.buffer.add_data(buf)
     }
 }
 
@@ -48,7 +70,9 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
 /// server will we receive an agent tagged as Trained. Untrained agents do not have access to the
 /// directions bytes, preventing them from being runnable
 pub struct Builder<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> {
+    /// The goal
     goal: Option<Goal<REWARD>>,
+    /// A reference to the agent's hardware
     body: Option<&'agent Body>,
 }
 
@@ -82,8 +106,7 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Builder<'agent, REWAR
             (Some(goal), Some(body)) => Some(AgentSession {
                 goal,
                 body,
-                data_buf: [0u8; BUFFER_SIZE],
-                buffer_pos: BufferMarker::default(),
+                buffer: DataBuffer::default(),
                 directions: None,
                 _spooky_ghost: PhantomData,
             }),

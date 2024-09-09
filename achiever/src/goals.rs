@@ -19,6 +19,16 @@ pub enum Goal<REWARD: Rewardable> {
     None,
 }
 
+impl<REWARD: Rewardable> Goal<REWARD> {
+    /// Evaluates a reward as its designated value
+    pub fn evaluate(&self) -> Option<f64> {
+        match self {
+            Self::Maximize(reward) | Self::Minimize(reward) => Some(reward.to_reward()),
+            Self::None => None,
+        }
+    }
+}
+
 /// Basic implementations of reward function for primitive types that make sense
 ///
 pub trait Rewardable {
