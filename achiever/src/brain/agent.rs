@@ -117,3 +117,23 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Builder<'agent, REWAR
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{body::Body, goals::Goal};
+
+    use super::{AgentSession, Untrained};
+
+    #[test]
+    fn agent_session_builder() {
+        let body = Body;
+        let agent = AgentSession::<'_, f32, Untrained, 10>::builder()
+            .with_goal(Goal::None)
+            .with_body(&body)
+            .build()
+            .expect("Build a completed agent");
+
+        assert_eq!(agent.get_body(), &body);
+        assert_eq!(agent.get_reward(), None);
+    }
+}
