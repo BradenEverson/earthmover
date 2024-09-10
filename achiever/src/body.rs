@@ -38,6 +38,16 @@ impl Body {
             .map(|(_, node)| node)
             .collect::<Vec<_>>()
     }
+
+    /// Gets a peripheral by its ID if it exists
+    pub fn get_by_id(&self, id: PeripheralKey) -> Option<&PeripheralNode> {
+        self.peripheral_graph.get(id)
+    }
+
+    /// Gets a mutable reference to a peripheral by its ID if it exists
+    pub fn get_by_id_mut(&mut self, id: PeripheralKey) -> Option<&mut PeripheralNode> {
+        self.peripheral_graph.get_mut(id)
+    }
 }
 
 /// An arbitrary peripheral that is either an input or output

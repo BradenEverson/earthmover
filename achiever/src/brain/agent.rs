@@ -1,13 +1,13 @@
 //! An Agent's behavior, session states, and builder
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, time::Duration};
 
 use crate::{
-    body::Body,
+    body::{Body, Peripheral},
     goals::{Goal, Rewardable},
 };
 
-use super::buffer::DataBuffer;
+use super::{buffer::DataBuffer, instruction::Instruction};
 
 /// TypeState for a newly untrained session
 pub struct Untrained;
@@ -22,11 +22,11 @@ pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: us
     /// The goal of the agent
     goal: Goal<REWARD>,
     /// A reference to the agent's hardware
-    body: &'agent Body,
+    body: &'agent mut Body,
     /// The data collection buffer
     buffer: DataBuffer<BUFFER_SIZE>,
     /// Instruction sets on completed training
-    directions: Option<Vec<u8>>,
+    directions: Option<Vec<Instruction>>,
     /// PhantomData for state :)
     _spooky_ghost: PhantomData<STATE>,
 }
@@ -63,8 +63,17 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
     AgentSession<'agent, REWARD, InReview, BUFFER_SIZE>
 {
     /// Gets the directions of a newly trained Agent
-    pub fn get_directions(&self) -> Option<&[u8]> {
-        self.directions.as_deref()
+    pub fn act(&mut self) {
+        if let Some(instructions) = &self.directions {
+            for instruction in instructions {
+                if let Some(node) = self.body.get_by_id_mut(instruction.node) {
+                    if let Peripheral::Output(output) = &mut node.peripheral {
+                        output.write(&instruction.instructions)
+                    }
+                }
+                std::thread::sleep(Duration::from_millis(instruction.lasts_for_ms as u64))
+            }
+        }
     }
 }
 
@@ -76,7 +85,7 @@ pub struct Builder<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> {
     /// The goal
     goal: Option<Goal<REWARD>>,
     /// A reference to the agent's hardware
-    body: Option<&'agent Body>,
+    body: Option<&'agent mut Body>,
 }
 
 impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Default
@@ -98,7 +107,7 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Builder<'agent, REWAR
     }
 
     /// Set an agent's body
-    pub fn with_body(mut self, body: &'agent Body) -> Self {
+    pub fn with_body(mut self, body: &'agent mut Body) -> Self {
         self.body = Some(body);
         self
     }

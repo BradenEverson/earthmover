@@ -7,7 +7,7 @@ pub struct Instruction {
     /// The node affected by the instruction
     pub node: PeripheralKey,
     /// The timespan this action lasts for
-    pub lasts_for_ms: f32,
+    pub lasts_for_ms: u32,
     /// The arbitrary data to send to the agent
     pub instructions: [u8; 4],
 }
