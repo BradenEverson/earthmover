@@ -79,10 +79,10 @@ pub struct PeripheralNode {
     pub points_to: Option<Vec<PeripheralKey>>,
 }
 
-impl Into<PeripheralNode> for Peripheral {
-    fn into(self) -> PeripheralNode {
+impl From<Peripheral> for PeripheralNode {
+    fn from(value: Peripheral) -> Self {
         PeripheralNode {
-            peripheral: self,
+            peripheral: value,
             points_to: None,
         }
     }
@@ -95,7 +95,9 @@ new_key_type! {
 
 /// Builder for a Body
 pub struct Builder {
+    /// The root peripheral and all peripherals with no parents
     root: Vec<PeripheralKey>,
+    /// All peripherals
     graph: SlotMap<PeripheralKey, PeripheralNode>,
 }
 
