@@ -5,6 +5,7 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+slotmap = "1.0.7"
 
 [lib]
 
