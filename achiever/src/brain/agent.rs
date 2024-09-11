@@ -1,6 +1,6 @@
 //! An Agent's behavior, session states, and builder
 
-use std::{marker::PhantomData, time::Duration};
+use std::{error::Error, marker::PhantomData, time::Duration};
 
 use crate::{
     body::{Body, Peripheral},
@@ -13,6 +13,10 @@ use super::{buffer::DataBuffer, instruction::Instruction};
 pub struct Untrained;
 /// TypeState for the type of agent session that is received after training
 pub struct InReview;
+
+/// Result type for when we're dealing with a bunch of input/output peripherals that have an
+/// unknown Error type
+pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 /// The agent will hold both the current goal of the system and a reference to the actual hardware
 /// we're using. After sufficient data from the environment has been collected, the goal, agent
@@ -63,17 +67,18 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
     AgentSession<'agent, REWARD, InReview, BUFFER_SIZE>
 {
     /// Gets the directions of a newly trained Agent
-    pub fn act(&mut self) {
+    pub fn act(&mut self) -> Result<()> {
         if let Some(instructions) = &self.directions {
             for instruction in instructions {
                 if let Some(node) = self.body.get_by_id_mut(instruction.node) {
                     if let Peripheral::Output(output) = &mut node.peripheral {
-                        output.write(&instruction.instructions)
+                        output.write(&instruction.instructions)?
                     }
                 }
                 std::thread::sleep(Duration::from_millis(instruction.lasts_for_ms as u64))
             }
         }
+        Ok(())
     }
 }
 

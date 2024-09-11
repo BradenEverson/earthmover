@@ -2,8 +2,10 @@
 
 /// A trait for outputs, defines a single method for writing bytes to an output
 pub trait Output {
+    /// The error read_input may return
+    type Error;
     /// Write bytes to an output peripheral
-    fn write(&mut self, bytes: &[u8]);
+    fn write(&mut self, bytes: &[u8]) -> Result<(), Self::Error>;
 }
 
 #[cfg(feature = "rpi")]

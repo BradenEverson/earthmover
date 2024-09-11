@@ -57,7 +57,7 @@ pub enum Peripheral {
     /// Input peripheral
     Input(Box<dyn Input<Error = Box<dyn Error>>>),
     /// Output peripheral
-    Output(Box<dyn Output>),
+    Output(Box<dyn Output<Error = Box<dyn Error>>>),
 }
 
 impl Peripheral {
