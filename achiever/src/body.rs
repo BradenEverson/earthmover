@@ -1,5 +1,7 @@
 //! The hardware controls for the agent
 
+use std::error::Error;
+
 use inputs::Input;
 use outputs::Output;
 use slotmap::{new_key_type, SlotMap};
@@ -53,9 +55,9 @@ impl Body {
 /// An arbitrary peripheral that is either an input or output
 pub enum Peripheral {
     /// Input peripheral
-    Input(Box<dyn Input>),
+    Input(Box<dyn Input<Error = Box<dyn Error>>>),
     /// Output peripheral
-    Output(Box<dyn Output>),
+    Output(Box<dyn Output<Error = Box<dyn Error>>>),
 }
 
 impl Peripheral {
