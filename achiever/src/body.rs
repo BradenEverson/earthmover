@@ -1,6 +1,6 @@
 //! The hardware controls for the agent
 
-use std::error::Error;
+use std::convert::Infallible;
 
 use inputs::Input;
 use outputs::Output;
@@ -8,6 +8,33 @@ use slotmap::{new_key_type, SlotMap};
 
 pub mod inputs;
 pub mod outputs;
+
+#[derive(thiserror::Error, Debug)]
+/// Any error that may come from a peripheral
+pub enum PeripheralError {
+    #[cfg(feature = "rpi")]
+    #[error("SPI Error")]
+    /// A raspberry pi spi error
+    SpiError(#[from] rppal::spi::Error),
+    #[cfg(feature = "rpi")]
+    #[error("GPIO Error")]
+    /// A raspberry pi gpio error
+    GpioError(#[from] rppal::gpio::Error),
+    #[cfg(feature = "rpi")]
+    #[error("Uart Error")]
+    /// A raspberry pi uart error
+    UartError(#[from] rppal::uart::Error),
+    #[cfg(feature = "rpi")]
+    #[error("I2C Error")]
+    /// A raspberry pi i2c error
+    I2CError(#[from] rppal::i2c::Error),
+    #[error("Infallible")]
+    /// An error that will never be returned
+    Infallible(#[from] Infallible),
+}
+
+#[cfg(feature = "rpi")]
+pub mod pi_peripherals;
 
 /// Abstraction over the hardware of the device. This is still TODO because I don't exactly know
 /// how we want to do this. My main idea is we can have an enum for Input/Output, and from there
@@ -55,9 +82,9 @@ impl Body {
 /// An arbitrary peripheral that is either an input or output
 pub enum Peripheral {
     /// Input peripheral
-    Input(Box<dyn Input<Error = Box<dyn Error>>>),
+    Input(Box<dyn Input<Error = PeripheralError>>),
     /// Output peripheral
-    Output(Box<dyn Output<Error = Box<dyn Error>>>),
+    Output(Box<dyn Output<Error = PeripheralError>>),
 }
 
 impl Peripheral {

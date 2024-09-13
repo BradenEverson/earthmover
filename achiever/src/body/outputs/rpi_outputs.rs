@@ -1,7 +1,5 @@
 //! Output Implementations for Raspberry Pi Output Peripherals
 
-use std::convert::Infallible;
-
 use rppal::{
     gpio::{Level, OutputPin},
     i2c::I2c,
@@ -9,10 +7,12 @@ use rppal::{
     uart::Uart,
 };
 
+use crate::body::PeripheralError;
+
 use super::Output;
 
 impl Output for OutputPin {
-    type Error = Infallible;
+    type Error = PeripheralError;
     fn write(&mut self, bytes: &[u8]) -> Result<(), Self::Error> {
         for byte in bytes {
             let state = match byte {
@@ -26,7 +26,7 @@ impl Output for OutputPin {
 }
 
 impl Output for I2c {
-    type Error = rppal::i2c::Error;
+    type Error = PeripheralError;
     fn write(&mut self, bytes: &[u8]) -> Result<(), Self::Error> {
         self.write(bytes)?;
         Ok(())
@@ -34,7 +34,7 @@ impl Output for I2c {
 }
 
 impl Output for Spi {
-    type Error = rppal::spi::Error;
+    type Error = PeripheralError;
     fn write(&mut self, bytes: &[u8]) -> Result<(), Self::Error> {
         self.write(bytes)?;
         Ok(())
@@ -42,7 +42,7 @@ impl Output for Spi {
 }
 
 impl Output for Uart {
-    type Error = rppal::uart::Error;
+    type Error = PeripheralError;
     fn write(&mut self, bytes: &[u8]) -> Result<(), Self::Error> {
         self.write(bytes)?;
         Ok(())
