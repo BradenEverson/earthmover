@@ -12,7 +12,7 @@ thiserror = "1.0.63"
 [lib]
 
 [features]
-default = ["rpi"]
+default = []
 rpi = ["dep:rppal"]
 jetson = []
 

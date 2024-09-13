@@ -28,6 +28,7 @@ pub enum PeripheralError {
     #[error("I2C Error")]
     /// A raspberry pi i2c error
     I2CError(#[from] rppal::i2c::Error),
+    #[cfg(feature = "rpi")]
     #[error("PWM Error")]
     /// A raspberry pi pwm error
     PwmError(#[from] rppal::pwm::Error),
