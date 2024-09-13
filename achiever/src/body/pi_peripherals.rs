@@ -3,6 +3,7 @@
 use rppal::{
     gpio::Gpio,
     i2c::I2c,
+    pwm::{Channel, Pwm},
     spi::{Bus, Mode, SlaveSelect, Spi},
 };
 
@@ -63,5 +64,11 @@ impl Peripheral {
         let spi = Spi::new(bus, slave_select, clock_speed, mode)?;
 
         Ok(Self::Output(Box::new(spi)))
+    }
+
+    /// Creates a Peripheral Output Node for a Raspberry Pi PWM Channel
+    pub fn pwm_output(channel: Channel) -> rppal::pwm::Result<Self> {
+        let pwm = Pwm::new(channel)?;
+        Ok(Self::Output(Box::new(pwm)))
     }
 }
