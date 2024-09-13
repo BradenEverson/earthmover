@@ -35,6 +35,22 @@ jobs:
         run: rustup update stable && rustup default stable
       - run: cargo test
 
+  test-rpi:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update stable && rustup default stable
+      - run: cargo test --features rpi
+      
+  test-jetson:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Rust
+        run: rustup update stable && rustup default stable
+      - run: cargo test --features jetson
+
   test-examples:
     runs-on: ubuntu-22.04
     steps:
