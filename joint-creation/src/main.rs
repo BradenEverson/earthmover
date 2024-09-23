@@ -41,7 +41,7 @@ async fn main() {
     };
 
     tokio::spawn(async move {
-        let state = state.clone();
+        let _state = state.clone();
     });
 
     connection_handler.await

@@ -10,7 +10,7 @@ use tokio::sync::RwLock;
 
 #[derive(Default)]
 pub struct State {
-    body: Vec<achiever::body::Body>,
+    _body: Vec<achiever::body::Body>,
 }
 
 impl State {}
@@ -18,12 +18,12 @@ impl State {}
 impl State {}
 
 pub struct JointService {
-    state: Arc<RwLock<State>>,
+    _state: Arc<RwLock<State>>,
 }
 
 impl JointService {
     pub fn new(state: Arc<RwLock<State>>) -> Self {
-        Self { state }
+        Self { _state: state }
     }
 }
 
