@@ -1,5 +1,5 @@
 [workspace]
-members = [ "achiever","hivemind", "joint-creation"]
+members = [ "earthmover-achiever","earthmover-hivemind"]
 resolver = "2"
 
 [workspace.package]

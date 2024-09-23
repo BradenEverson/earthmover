@@ -1,0 +1,30 @@
+[package]
+name = "earthmover-achiever"
+edition = "2021"
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+rppal = { version = "0.19.0", optional = true }
+slotmap = "1.0.7"
+thiserror = "1.0.63"
+
+[lib]
+
+[features]
+default = []
+rpi = ["dep:rppal"]
+jetson = []
+
+[lints.rust]
+missing_docs = "warn"
+nonstandard-style = "warn"
+rust-2018-idioms = "warn"
+rust-2021-compatibility = "warn"
+rust-2024-compatibility = "warn"
+
+[lints.rustdoc]
+broken_intra_doc_links = "warn"
+
+[lints.clippy]
+missing_docs_in_private_items = "warn"

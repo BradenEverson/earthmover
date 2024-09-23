@@ -1,7 +1,0 @@
-[package]
-name = "hivemind"
-edition = "2021"
-version.workspace = true
-authors.workspace = true
-
-[dependencies]
