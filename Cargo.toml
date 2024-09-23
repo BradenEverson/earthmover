@@ -1,5 +1,5 @@
 [workspace]
-members = [ "achiever","hivemind"]
+members = [ "achiever","hivemind", "joint-creation"]
 resolver = "2"
 
 [workspace.package]
