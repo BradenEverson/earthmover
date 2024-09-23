@@ -53,6 +53,9 @@ pub struct Body {
     pub peripheral_graph: SlotMap<PeripheralKey, PeripheralNode>,
 }
 
+unsafe impl Send for Body {}
+unsafe impl Sync for Body {}
+
 impl Body {
     /// Returns all input nodes
     pub fn inputs(&self) -> Vec<&PeripheralNode> {
