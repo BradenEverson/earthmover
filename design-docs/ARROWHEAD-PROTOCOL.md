@@ -27,11 +27,14 @@ Once a session is initiated, the server is ready to accept a websocket session w
 
 ### Sending Messages
 
-**SEND**: Send relevant data as a tuple of 32 bit floating point numbers of unknown size. This allows for xyz coordinates to be registered, alongside any other relevant peripheral readings. 
+* **SEND**: Send relevant data as a tuple of 32 bit floating point numbers of unknown size. This allows for xyz coordinates to be registered, alongside any other relevant peripheral readings. 
     For example: An agent wishing to send x, y, z, thermistor, and light sensitivity data may look as follows:
-        `SEND: [[0.0, 0.5, 0.7, 1.3, 0.85],[0.2, 0.32, 7.6, 11.5, 0.0],[0.32, 5.4, 3.5, 9.0, 1.1]]`
-**GOAL**: A list of tuples of the form `(unsigned number, boolean)` that describes the indices of what reading values we want to maximize/minimize along with a boolean for whether maximize is true. In other words, true for maximize value, false for minimize.
+    - `SEND: [[0.0, 0.5, 0.7, 1.3, 0.85],[0.2, 0.32, 7.6, 11.5, 0.0],[0.32, 5.4, 3.5, 9.0, 1.1]]`
+* **GOAL**: A list of tuples of the form `(unsigned number, boolean)` that describes the indices of what reading values we want to maximize/minimize along with a boolean for whether maximize is true. In other words, true for maximize value, false for minimize.
+    For example: Using the previous example again, if we wanted to maximize the thermisor and minimize the light values we would send:
+    - `GOAL: [(3, true), (4, false)]`
+    - Note: Any reoccuring indices is considered an error
 
 ### Receiving Messages
 
-**INSTR**:
+* **INSTR**:
