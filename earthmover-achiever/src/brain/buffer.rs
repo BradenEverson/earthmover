@@ -3,11 +3,11 @@
 
 use std::ops::Deref;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 /// A DataBuffer with known position
 pub struct DataBuffer<const BUFFER_SIZE: usize> {
     /// The data
-    data: [u8; BUFFER_SIZE],
+    data: [f32; BUFFER_SIZE],
     /// Where we are in that data
     marker: BufferMarker<BUFFER_SIZE>,
 }
@@ -15,14 +15,14 @@ pub struct DataBuffer<const BUFFER_SIZE: usize> {
 impl<const BUFFER_SIZE: usize> Default for DataBuffer<BUFFER_SIZE> {
     fn default() -> Self {
         Self {
-            data: [0u8; BUFFER_SIZE],
+            data: [0f32; BUFFER_SIZE],
             marker: BufferMarker::default(),
         }
     }
 }
 
-impl<const BUFFER_SIZE: usize> AsRef<[u8]> for DataBuffer<BUFFER_SIZE> {
-    fn as_ref(&self) -> &[u8] {
+impl<const BUFFER_SIZE: usize> AsRef<[f32]> for DataBuffer<BUFFER_SIZE> {
+    fn as_ref(&self) -> &[f32] {
         if *self.marker == BUFFER_SIZE - 1 {
             &self.data
         } else {
@@ -34,7 +34,7 @@ impl<const BUFFER_SIZE: usize> AsRef<[u8]> for DataBuffer<BUFFER_SIZE> {
 impl<const BUFFER_SIZE: usize> DataBuffer<BUFFER_SIZE> {
     /// Adds a buffer of bytes to the internal data buffer. If the length of the data to add is
     /// greater than what's left in the buffer, we close early and return `None`
-    pub fn add_data(&mut self, buf: &[u8]) -> Option<()> {
+    pub fn add_data(&mut self, buf: &[f32]) -> Option<()> {
         if buf.len() <= self.data.len() - *self.marker {
             for byte in buf {
                 *self.get()? = *byte;
@@ -46,7 +46,7 @@ impl<const BUFFER_SIZE: usize> DataBuffer<BUFFER_SIZE> {
     }
 
     /// Returns a mutable reference to the current byte, then increments the marker
-    fn get(&mut self) -> Option<&mut u8> {
+    fn get(&mut self) -> Option<&mut f32> {
         let mut_byte = &mut self.data[*self.marker];
         let _ = self.marker.inc();
         Some(mut_byte)
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn data_buffer_can_be_fully_filled() {
         let mut buf: DataBuffer<10> = DataBuffer::default();
-        let data = [10u8; 10];
+        let data = [10f32; 10];
 
         buf.add_data(&data).expect("Fill buf all the way with data");
         assert_eq!(buf.as_ref(), &data);
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn data_buffer_cannot_be_overfilled() {
         let mut buf: DataBuffer<10> = DataBuffer::default();
-        let data = [10u8; 11];
+        let data = [10f32; 11];
 
         let overfill = buf.add_data(&data);
         assert!(overfill.is_none())
@@ -105,24 +105,9 @@ mod tests {
     #[test]
     fn partially_filled_data_buffer() {
         let mut buf: DataBuffer<100> = DataBuffer::default();
-        let small_chunk = b"Hello!";
-        buf.add_data(small_chunk).expect("Add to a buffer");
-        let word: &[u8] = buf.as_ref();
-
-        assert_eq!(word, small_chunk)
-    }
-
-    #[test]
-    fn partially_filled_data_buffer_stays_after_overfill() {
-        let mut buf: DataBuffer<10> = DataBuffer::default();
-        let small_chunk = b"Hello!";
-        buf.add_data(small_chunk).expect("Add to a buffer");
-        let small_over_chunk = b" world!";
-
-        let overfill = buf.add_data(small_over_chunk);
-        assert!(overfill.is_none());
-
-        let word: &[u8] = buf.as_ref();
+        let small_chunk = [1f32, 2f32];
+        buf.add_data(&small_chunk).expect("Add to a buffer");
+        let word: &[f32] = buf.as_ref();
 
         assert_eq!(word, small_chunk)
     }

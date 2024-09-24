@@ -58,7 +58,7 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
     AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>
 {
     /// Adds a slice of data to the buffer, if that slice is too large `None` is returned
-    pub fn add_data(&mut self, buf: &[u8]) -> Option<()> {
+    pub fn add_data(&mut self, buf: &[f32]) -> Option<()> {
         self.buffer.add_data(buf)
     }
 }
