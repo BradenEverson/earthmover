@@ -6,8 +6,6 @@ The `Earthmover` agent must communicate with it's `Hivemind` server to plan, rea
 1) Initiation
 2) Communication
 3) Response
-4) Retrospect
-
 
 ## Initiation
 The `Hivemind` must be aware not only of the `agent`'s sorroundings and observations, but the physical body which will navigate this environment. Initiation of a session is where this context is supplied. 
@@ -37,4 +35,11 @@ Once a session is initiated, the server is ready to accept a websocket session w
 
 ### Receiving Messages
 
-* **INSTR**:
+* **INSTR**: An instruction set sent from the `hivemind` to the `agent`. This describes the actions necessary to get closer to completing the submitted goal.
+    - The **INSTR** format goes as follows, and takes up 16 bytes per message:
+        - **node:** The ID of the peripheral output node this instruction targets (4 bytes)
+        - **lasts_for_ms**: The time in milliseconds that this instruction should last for (4 bytes)
+        - **instructions**: 4 optional bytes representing information for the designated output node. These bytes can be interpretted differently based on what output is being communicated with, making this very abstract
+    - An **INSTR** could be a list of several **INSTR** as well. This allows for chained movements
+    - Example: if the `hivemind` computed the way to get closer to a designated goal was to move servo `2` `180` degrees, the **INSTR** could be something as follows:
+        - `INSTR: {node: 2, lasts_for_ms: 1000, instructions: [180, None, None, None]}`
