@@ -1,15 +1,16 @@
 //! The simulation enviornment responsible for constructing and interpretting collected data from
 //! the `agent`. Allows for concurrent reinforcement learning and modular agent construction
-//! through URDF parsing to interpret agent structure. 
+//! through URDF parsing to interpret agent structure.
 
 use std::{future::Future, pin::Pin};
 
 use futures::stream::FuturesUnordered;
 use sim::{SimArgs, SimRes};
 
-pub mod sim;
 pub mod orchestrate;
+pub mod sim;
 
+/// The future responsible for fully executing a simulation
 type SimulationExecution<OUT> = Pin<Box<dyn Future<Output = OUT> + Send>>;
 
 /// Asynchronous function responsible for constructing and then simulating an environment given a
@@ -23,5 +24,6 @@ pub async fn simulate<const N: usize>(args: impl AsRef<SimArgs>) -> SimRes {
 
 /// The struct responsible for running a collection of N simulations
 pub struct Orchestrator<const N: usize> {
+    /// All simulations currently being run
     batch_sims: FuturesUnordered<SimulationExecution<SimRes>>,
 }

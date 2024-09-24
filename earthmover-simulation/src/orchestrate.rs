@@ -7,7 +7,7 @@ use crate::{sim::SimRes, simulate, Orchestrator};
 impl<const N: usize> Orchestrator<N> {
     /// Submits `sim_amount` simulations to the Orchestrator for execution
     pub fn submit(&mut self, sim_amount: usize) {
-        let fut = (0..sim_amount).into_iter().map(|_| simulate::<N>("todo").boxed());
+        let fut = (0..sim_amount).map(|_| simulate::<N>("todo").boxed());
         self.batch_sims.extend(fut)
     }
 
