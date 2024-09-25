@@ -5,11 +5,11 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+clap = { version = "4.5.18", features = ["derive"] }
 rppal = { version = "0.19.0", optional = true }
 slotmap = "1.0.7"
 thiserror = "1.0.63"
-
-[lib]
+tokio = { version = "1.40.0", features = ["full"] }
 
 [features]
 default = []
