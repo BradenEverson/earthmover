@@ -5,6 +5,8 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+bevy = "0.14.2"
+bevy_rapier3d = "0.27.0"
 futures = "0.3.30"
 
 [lints.rust]

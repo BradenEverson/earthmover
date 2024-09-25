@@ -4,6 +4,7 @@
 
 use std::{future::Future, pin::Pin};
 
+use bevy::app::App;
 use futures::stream::FuturesUnordered;
 use sim::{SimArgs, SimRes};
 
@@ -19,6 +20,7 @@ type SimulationExecution<OUT> = Pin<Box<dyn Future<Output = OUT> + Send>>;
 pub async fn simulate<const N: usize>(args: impl AsRef<SimArgs>) -> SimRes {
     let _sim_args = args.as_ref();
 
+    App::new().run();
     todo!()
 }
 
