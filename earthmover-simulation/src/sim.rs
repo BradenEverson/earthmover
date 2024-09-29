@@ -1,5 +1,7 @@
 //! The arguments to be passed through to a simulation and outputs that can be returned
 
+pub mod backend;
+
 use std::sync::Arc;
 
 use earthmover_achiever::{
@@ -30,6 +32,26 @@ pub struct SimRes {
     /// The instructions to achieve this score
     instructions: Vec<Instruction>,
 }
+
+impl PartialOrd for SimRes {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.score.partial_cmp(&other.score)
+    }
+}
+
+impl Ord for SimRes {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl PartialEq for SimRes {
+    fn eq(&self, other: &Self) -> bool {
+        self.score == other.score
+    }
+}
+
+impl Eq for SimRes {}
 
 impl SimRes {
     /// Adds a new instruction to the back of the instruction set

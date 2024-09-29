@@ -30,6 +30,6 @@ impl<const N: usize> Orchestrator<N> {
             results.push(result);
         }
 
-        todo!("Process the returned SimReses and find the one with the best fitness");
+        results.into_iter().max().unwrap()
     }
 }

@@ -4,10 +4,9 @@
 
 use std::{future::Future, pin::Pin, sync::Arc};
 
-use bevy::app::App;
 use earthmover_achiever::goals::Rewardable;
 use futures::stream::FuturesUnordered;
-use sim::{SimArgs, SimMessage, SimRes};
+use sim::{backend::Simulation, SimArgs, SimMessage, SimRes};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 pub mod orchestrate;
@@ -19,15 +18,16 @@ type SimulationExecution<OUT> = Pin<Box<dyn Future<Output = OUT> + Send>>;
 /// Asynchronous function responsible for constructing and then simulating an environment given a
 /// collection of N-dimensional points, an agent's configuration(hardware alongside current
 /// angles/position) and a `GOAL` function
-pub async fn simulate<'agent, REWARD: Rewardable, const N: usize, const BUFFER_SIZE: usize>(
-    _args: Arc<SimArgs<'agent, REWARD, BUFFER_SIZE>>,
+pub async fn simulate<'agent, REWARD: Rewardable, const N: usize, const BUFFER_SIZE: usize, SIM: Simulation + Sync>(
+    simulation_backend: SIM,
+    args: Arc<SimArgs<'agent, REWARD, BUFFER_SIZE>>,
 ) -> SimRes {
     let mut res = SimRes::default();
-    let (_sender, mut receiver): (UnboundedSender<SimMessage>, UnboundedReceiver<SimMessage>) =
+    let (sender, mut receiver): (UnboundedSender<SimMessage>, UnboundedReceiver<SimMessage>) =
         mpsc::unbounded_channel();
 
     tokio::spawn(async move {
-        App::new().run();
+        simulation_backend.simulate(args.clone(), sender)
     });
 
     while let Some(msg) = receiver.recv().await {
