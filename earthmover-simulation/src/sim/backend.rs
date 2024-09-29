@@ -17,4 +17,8 @@ pub trait Simulation {
         args: Arc<SimArgs<REWARD>>,
         message_sender: UnboundedSender<SimMessage>,
     );
+    /// The backend's name
+    fn name(&self) -> String {
+        "Empty".into()
+    }
 }

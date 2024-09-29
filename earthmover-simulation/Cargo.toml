@@ -10,6 +10,8 @@ bevy_rapier3d = "0.27.0"
 futures = "0.3.30"
 earthmover-achiever = { path = "../earthmover-achiever" }
 tokio = { version = "1.40.0", features = ["full"] }
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
 
 [lints.rust]
 missing_docs = "warn"
@@ -23,3 +25,6 @@ broken_intra_doc_links = "warn"
 
 [lints.clippy]
 missing_docs_in_private_items = "warn"
+
+[dev-dependencies]
+rand = "0.8.5"
