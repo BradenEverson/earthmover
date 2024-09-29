@@ -23,3 +23,6 @@ broken_intra_doc_links = "warn"
 
 [lints.clippy]
 missing_docs_in_private_items = "warn"
+
+[dev-dependencies]
+rand = "0.8.5"

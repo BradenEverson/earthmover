@@ -9,6 +9,11 @@ use futures::stream::FuturesUnordered;
 use sim::{backend::Simulation, SimArgs, SimMessage, SimRes};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
+#[cfg(test)]
+use earthmover_achiever::brain::instruction::Instruction;
+#[cfg(test)]
+use rand::{thread_rng, Rng};
+
 pub mod orchestrate;
 pub mod sim;
 
@@ -52,4 +57,44 @@ pub struct Orchestrator<SIM: Simulation + Send + Sync + Copy + 'static, const N:
     batch_sims: FuturesUnordered<SimulationExecution<SimRes>>,
     /// The simulation's backend
     simulation_backend: SIM,
+}
+
+#[cfg(test)]
+/// A test backend that just creates dummy instructions and scores
+#[derive(Clone, Copy)]
+struct SimpleBackend;
+
+#[cfg(test)]
+impl Simulation for SimpleBackend {
+    fn simulate<REWARD: Rewardable>(
+        &self,
+        _args: Arc<SimArgs<REWARD>>,
+        message_sender: UnboundedSender<SimMessage>,
+    ) {
+        let mut rng = thread_rng();
+        for _ in 0..rng.gen_range(0..10) {
+            let instruction = Instruction::default();
+            message_sender
+                .send(SimMessage::Instruction(instruction))
+                .expect("Send failed :(");
+        }
+
+        message_sender
+            .send(SimMessage::Close(rng.gen_range(0f64..1f64)))
+            .expect("Failed to close out simulation");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use earthmover_achiever::body::Body;
+
+    use crate::{sim::SimArgs, Orchestrator, SimpleBackend};
+
+    #[tokio::test]
+    async fn orchestrator_simple_simulation_backend() {
+        let mut orchestrator: Orchestrator<SimpleBackend, 3> = Orchestrator::new(SimpleBackend);
+        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1_000_000);
+        let _ = orchestrator.run().await;
+    }
 }

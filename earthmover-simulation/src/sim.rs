@@ -21,6 +21,11 @@ impl<REWARD: Rewardable + Send + Sync + 'static> SimArgs<REWARD> {
     pub fn arc(self) -> ArcSimArgs<REWARD> {
         Arc::new(self)
     }
+
+    /// Creates a new SimArgs from raw parts
+    pub fn new(reward: REWARD, data: Vec<f32>, body: Body) -> Self {
+        Self { reward, data, body }
+    }
 }
 
 /// An arc-wrapped SimArg
@@ -64,6 +69,16 @@ impl SimRes {
     /// Sets the agents score for the provided instructions
     pub fn set_score(&mut self, score: f64) {
         self.score = score
+    }
+
+    /// Returns the fitness score
+    pub fn get_score(&self) -> f64 {
+        self.score
+    }
+
+    /// Returns the instructions
+    pub fn get_instructions(&self) -> &[Instruction] {
+        &self.instructions
     }
 }
 

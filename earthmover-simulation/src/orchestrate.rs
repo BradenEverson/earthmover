@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use earthmover_achiever::goals::Rewardable;
-use futures::{FutureExt, StreamExt};
+use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
 
 use crate::{
     sim::{backend::Simulation, SimArgs, SimRes},
@@ -12,7 +12,7 @@ use crate::{
 
 impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrator<SIM, N> {
     /// Submits `sim_amount` simulations to the Orchestrator for execution
-    pub fn submit<REWARD: Rewardable + Sync + Send + 'static, const BUFFER_SIZE: usize>(
+    pub fn submit<REWARD: Rewardable + Sync + Send + 'static>(
         &mut self,
         job: SimArgs<REWARD>,
         sim_amount: usize,
@@ -31,5 +31,13 @@ impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrato
         }
 
         results.into_iter().max().unwrap()
+    }
+
+    /// Creates a new Orchestrator based on a given simulation backend
+    pub fn new(sim: SIM) -> Self {
+        Self {
+            batch_sims: FuturesUnordered::new(),
+            simulation_backend: sim,
+        }
     }
 }
