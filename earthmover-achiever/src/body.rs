@@ -5,6 +5,7 @@ use std::convert::Infallible;
 use inputs::Input;
 use outputs::Output;
 use slotmap::{new_key_type, SlotMap};
+use urdf_rs::Robot;
 
 pub mod inputs;
 pub mod outputs;
@@ -51,6 +52,8 @@ pub struct Body {
     pub root: Vec<PeripheralKey>,
     /// The dependency graph of all Peripherals
     pub peripheral_graph: SlotMap<PeripheralKey, PeripheralNode>,
+    /// The urdf robot context
+    pub urdf: Option<Robot>,
 }
 
 unsafe impl Send for Body {}
@@ -160,6 +163,7 @@ impl Builder {
         Body {
             root: self.root,
             peripheral_graph: self.graph,
+            urdf: None,
         }
     }
 }
