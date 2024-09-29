@@ -1,13 +1,25 @@
 //! The implementation for generating a batch of simulations and running them
 
+use std::sync::Arc;
+
+use earthmover_achiever::goals::Rewardable;
 use futures::{FutureExt, StreamExt};
 
-use crate::{sim::SimRes, simulate, Orchestrator};
+use crate::{
+    sim::{SimArgs, SimRes},
+    simulate, Orchestrator,
+};
 
 impl<const N: usize> Orchestrator<N> {
     /// Submits `sim_amount` simulations to the Orchestrator for execution
-    pub fn submit(&mut self, sim_amount: usize) {
-        let fut = (0..sim_amount).map(|_| simulate::<N>("todo").boxed());
+    pub fn submit<REWARD: Rewardable + Sync + Send + 'static, const BUFFER_SIZE: usize>(
+        &mut self,
+        job: SimArgs<'static, REWARD, BUFFER_SIZE>,
+        sim_amount: usize,
+    ) {
+        let arc_job = Arc::new(job);
+        let fut =
+            (0..sim_amount).map(|_| simulate::<REWARD, N, BUFFER_SIZE>(arc_job.clone()).boxed());
         self.batch_sims.extend(fut)
     }
 

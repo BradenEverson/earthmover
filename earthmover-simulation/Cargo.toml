@@ -8,6 +8,8 @@ authors.workspace = true
 bevy = "0.14.2"
 bevy_rapier3d = "0.27.0"
 futures = "0.3.30"
+earthmover-achiever = { path = "../earthmover-achiever" }
+tokio = { version = "1.40.0", features = ["full"] }
 
 [lints.rust]
 missing_docs = "warn"

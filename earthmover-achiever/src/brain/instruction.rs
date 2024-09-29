@@ -3,6 +3,7 @@
 use crate::body::PeripheralKey;
 
 /// A single instruction of movement for an Agent
+#[derive(Default, Debug)]
 pub struct Instruction {
     /// The node affected by the instruction
     pub node: PeripheralKey,
