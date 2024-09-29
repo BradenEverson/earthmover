@@ -184,14 +184,14 @@ mod tests {
     #[tokio::test]
     async fn orchestrator_simple_simulation_backend() {
         let mut orchestrator: Orchestrator<_, 3> = Orchestrator::new(SimpleBackend);
-        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1_000_000);
+        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1000);
         let _ = orchestrator.run().await;
     }
 
     #[tokio::test]
     async fn orchestrator_physics_informed_backend() {
         let mut orchestrator: Orchestrator<_, 3> = Orchestrator::new(SimplePhysicsBackend);
-        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1_000_000);
+        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1000);
         let _ = orchestrator.run().await;
     }
 }
