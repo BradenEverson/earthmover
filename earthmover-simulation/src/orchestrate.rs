@@ -6,20 +6,20 @@ use earthmover_achiever::goals::Rewardable;
 use futures::{FutureExt, StreamExt};
 
 use crate::{
-    sim::{SimArgs, SimRes},
+    sim::{backend::Simulation, SimArgs, SimRes},
     simulate, Orchestrator,
 };
 
-impl<const N: usize> Orchestrator<N> {
+impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrator<SIM, N> {
     /// Submits `sim_amount` simulations to the Orchestrator for execution
     pub fn submit<REWARD: Rewardable + Sync + Send + 'static, const BUFFER_SIZE: usize>(
         &mut self,
-        job: SimArgs<'static, REWARD, BUFFER_SIZE>,
+        job: SimArgs<REWARD>,
         sim_amount: usize,
     ) {
         let arc_job = Arc::new(job);
-        let fut =
-            (0..sim_amount).map(|_| simulate::<REWARD, N, BUFFER_SIZE>(arc_job.clone()).boxed());
+        let fut = (0..sim_amount)
+            .map(|_| simulate::<REWARD, N, SIM>(self.simulation_backend, arc_job.clone()).boxed());
         self.batch_sims.extend(fut)
     }
 

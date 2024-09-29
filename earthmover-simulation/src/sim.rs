@@ -4,25 +4,27 @@ pub mod backend;
 
 use std::sync::Arc;
 
-use earthmover_achiever::{
-    brain::{agent::Untrained, instruction::Instruction, AgentSession},
-    goals::Rewardable,
-};
+use earthmover_achiever::{body::Body, brain::instruction::Instruction, goals::Rewardable};
 
 /// Any agruments that a simulation may take in
-pub struct SimArgs<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>(
-    pub Arc<AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>>,
-);
+pub struct SimArgs<REWARD: Rewardable + Send + Sync + 'static> {
+    /// The simulation reward
+    pub reward: REWARD,
+    /// The data passed in
+    pub data: Vec<f32>,
+    /// The agent's body
+    pub body: Body,
+}
 
-impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
-    Into<SimArgs<'agent, REWARD, BUFFER_SIZE>>
-    for AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>
-{
-    fn into(self) -> SimArgs<'agent, REWARD, BUFFER_SIZE> {
-        let arc_self = Arc::new(self);
-        SimArgs(arc_self)
+impl<REWARD: Rewardable + Send + Sync + 'static> SimArgs<REWARD> {
+    /// Wraps self in an arc
+    pub fn arc(self) -> ArcSimArgs<REWARD> {
+        Arc::new(self)
     }
 }
+
+/// An arc-wrapped SimArg
+pub type ArcSimArgs<REWARD> = Arc<SimArgs<REWARD>>;
 
 /// The output from a simulation's runtime
 #[derive(Default, Debug)]
@@ -35,13 +37,13 @@ pub struct SimRes {
 
 impl PartialOrd for SimRes {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.score.partial_cmp(&other.score)
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for SimRes {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.partial_cmp(other).unwrap()
+        self.score.total_cmp(&other.score)
     }
 }
 

@@ -31,7 +31,7 @@ impl<REWARD: Rewardable> Goal<REWARD> {
 
 /// Basic implementations of reward function for primitive types that make sense
 ///
-pub trait Rewardable {
+pub trait Rewardable: Send + Sync {
     /// Returns an implementation's 'reward value' as an f64
     fn to_reward(&self) -> f64;
 }

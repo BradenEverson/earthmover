@@ -12,5 +12,9 @@ use super::{SimArgs, SimMessage};
 pub trait Simulation {
     /// Runs through a simulation based on beginning arguments, reports back to a Receiver with
     /// instructions to reach a certain `Score`
-    fn simulate<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>(&self, args: Arc<SimArgs<'agent, REWARD, BUFFER_SIZE>>, message_sender: UnboundedSender<SimMessage>);
+    fn simulate<REWARD: Rewardable>(
+        &self,
+        args: Arc<SimArgs<REWARD>>,
+        message_sender: UnboundedSender<SimMessage>,
+    );
 }
