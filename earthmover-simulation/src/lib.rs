@@ -13,6 +13,7 @@ use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 use earthmover_achiever::brain::instruction::Instruction;
 #[cfg(test)]
 use rand::{thread_rng, Rng};
+use tracing::info;
 
 pub mod orchestrate;
 pub mod sim;
@@ -31,6 +32,7 @@ pub async fn simulate<
     simulation_backend: SIM,
     sim_args: Arc<SimArgs<REWARD>>,
 ) -> SimRes {
+    info!("Beginning simulation...");
     let mut res = SimRes::default();
     let (sender, mut receiver): (UnboundedSender<SimMessage>, UnboundedReceiver<SimMessage>) =
         mpsc::unbounded_channel();
@@ -42,6 +44,7 @@ pub async fn simulate<
         match msg {
             SimMessage::Instruction(instr) => res.push_instruction(instr),
             SimMessage::Close(score) => {
+                info!("Final Score: {score}");
                 res.set_score(score);
                 break;
             }
@@ -71,6 +74,7 @@ impl Simulation for SimpleBackend {
         _args: Arc<SimArgs<REWARD>>,
         message_sender: UnboundedSender<SimMessage>,
     ) {
+        let _ = tracing_subscriber::fmt::try_init();
         let mut rng = thread_rng();
         for _ in 0..rng.gen_range(0..10) {
             let instruction = Instruction::default();
@@ -82,6 +86,10 @@ impl Simulation for SimpleBackend {
         message_sender
             .send(SimMessage::Close(rng.gen_range(0f64..1f64)))
             .expect("Failed to close out simulation");
+    }
+
+    fn name(&self) -> String {
+        "Simple Backend".into()
     }
 }
 

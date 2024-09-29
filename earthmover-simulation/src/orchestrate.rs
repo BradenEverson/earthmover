@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use earthmover_achiever::goals::Rewardable;
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
+use tracing::info;
 
 use crate::{
     sim::{backend::Simulation, SimArgs, SimRes},
@@ -17,6 +18,7 @@ impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrato
         job: SimArgs<REWARD>,
         sim_amount: usize,
     ) {
+        info!("Submitting {sim_amount} simulation requests to backend {}", self.simulation_backend.name());
         let arc_job = Arc::new(job);
         let fut = (0..sim_amount)
             .map(|_| simulate::<REWARD, N, SIM>(self.simulation_backend, arc_job.clone()).boxed());
