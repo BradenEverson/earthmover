@@ -20,7 +20,6 @@ use rapier3d::prelude::*;
 
 use tracing::info;
 
-
 pub mod orchestrate;
 pub mod sim;
 
@@ -123,7 +122,11 @@ impl Simulation for SimplePhysicsBackend {
 
         /* Create the bounding ball. */
         let rigid_body = RigidBodyBuilder::dynamic()
-            .translation(vector![rng.gen_range(0f32..3f32), rng.gen_range(0f32..10f32), 0.0])
+            .translation(vector![
+                rng.gen_range(0f32..3f32),
+                rng.gen_range(0f32..10f32),
+                0.0
+            ])
             .build();
         let collider = ColliderBuilder::ball(0.5).restitution(0.7).build();
         let ball_body_handle = rigid_body_set.insert(rigid_body);
@@ -158,11 +161,13 @@ impl Simulation for SimplePhysicsBackend {
                 Some(&mut query_pipeline),
                 &physics_hooks,
                 &event_handler,
-                );
+            );
         }
 
         let ball_body = &rigid_body_set[ball_body_handle];
-        message_sender.send(SimMessage::Close(ball_body.translation().y as f64)).expect("Failed to send final ball y");
+        message_sender
+            .send(SimMessage::Close(ball_body.translation().y as f64))
+            .expect("Failed to send final ball y");
     }
 
     fn name(&self) -> String {
@@ -179,14 +184,14 @@ mod tests {
     #[tokio::test]
     async fn orchestrator_simple_simulation_backend() {
         let mut orchestrator: Orchestrator<_, 3> = Orchestrator::new(SimpleBackend);
-        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 100_000);
+        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1_000_000);
         let _ = orchestrator.run().await;
     }
 
     #[tokio::test]
     async fn orchestrator_physics_informed_backend() {
         let mut orchestrator: Orchestrator<_, 3> = Orchestrator::new(SimplePhysicsBackend);
-        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 100_000);
+        orchestrator.submit(SimArgs::new(1.0, vec![], Body::default()), 1_000_000);
         let _ = orchestrator.run().await;
     }
 }
