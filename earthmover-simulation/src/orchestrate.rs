@@ -37,10 +37,10 @@ impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrato
             ProgressStyle::with_template(
                 "{spinner:.cyan/blue} [{elapsed_precise}] [{wide_bar:.cyan/blue}] \
                 {pos:>7}/{len:7} {msg}",
-                )
+            )
             .unwrap()
             .progress_chars("#>-"),
-            );
+        );
 
         progress.inc(0);
         progress.enable_steady_tick(Duration::from_millis(100));
