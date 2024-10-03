@@ -1,9 +1,10 @@
 //! The implementation for generating a batch of simulations and running them
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use earthmover_achiever::goals::Rewardable;
 use futures::{stream::FuturesUnordered, FutureExt, StreamExt};
+use indicatif::{ProgressBar, ProgressStyle};
 use tracing::info;
 
 use crate::{
@@ -31,7 +32,21 @@ impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrato
     /// Runs all batch simulations and returns the simulation with the best fitness
     pub async fn run(&mut self) -> SimRes {
         let mut results = vec![];
+        let progress = ProgressBar::new(self.batch_sims.len() as u64);
+        progress.set_style(
+            ProgressStyle::with_template(
+                "{spinner:.cyan/blue} [{elapsed_precise}] [{wide_bar:.cyan/blue}] \
+                {pos:>7}/{len:7} {msg}",
+            )
+            .unwrap()
+            .progress_chars("#>-"),
+        );
+
+        progress.inc(0);
+        progress.enable_steady_tick(Duration::from_millis(100));
+
         while let Some(result) = self.batch_sims.next().await {
+            progress.inc(1);
             results.push(result);
         }
 
