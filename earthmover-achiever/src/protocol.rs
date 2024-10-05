@@ -19,7 +19,7 @@ where
     ///
     /// For example, `Goal([(0, true)])` would attempt to maximize the first dimension on the
     /// agent's readings.
-    GOAL(Vec<(usize, bool)>),
+    Goal(Vec<(usize, bool)>),
 }
 
 /// A response from the simulation server.
@@ -48,3 +48,23 @@ impl_array_bounded_size!(
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
     26, 27, 28, 29, 30, 31, 32
 );
+
+// Some helpful stuff for creating messages conveniently
+
+impl<const DIMS: usize> From<Vec<(usize, bool)>> for AhtpMessage<DIMS>
+where
+    [f32; DIMS]: ArrayBoundedSize + Serialize + DeserializeOwned,
+{
+    fn from(value: Vec<(usize, bool)>) -> Self {
+        Self::Goal(value)
+    }
+}
+
+impl<const DIMS: usize> From<Vec<[f32; DIMS]>> for AhtpMessage<DIMS>
+where
+    [f32; DIMS]: ArrayBoundedSize + Serialize + DeserializeOwned,
+{
+    fn from(value: Vec<[f32; DIMS]>) -> Self {
+        Self::Send(value)
+    }
+}
