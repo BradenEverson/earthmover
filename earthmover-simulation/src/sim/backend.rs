@@ -1,5 +1,7 @@
 //! Trait for defining how a simulation is handled, through for example Bevy simulations
 
+pub mod physics;
+
 use std::sync::Arc;
 
 use earthmover_achiever::goals::Rewardable;
