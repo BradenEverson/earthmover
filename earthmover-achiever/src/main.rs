@@ -30,7 +30,7 @@ struct Config {
 
 impl Config {
     /// Parses a config into an agent's Body and Goals
-    pub fn get_body_and_goals(&self) -> (Option<Body>, Option<Vec<Goal<f32>>>) {
+    pub fn get_body_and_goals(&self) -> (Option<Body>, Option<Goal<f32>>) {
         todo!()
     }
 }
@@ -51,7 +51,7 @@ pub async fn main() {
 
     let _agent = AgentSession::<_, Untrained, 100_000>::builder()
         .with_body(&mut body)
-        .with_goal(Goal::Complex(goals))
+        .with_goal(goals)
         .build()
         .unwrap();
 
