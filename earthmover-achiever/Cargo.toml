@@ -6,10 +6,17 @@ authors.workspace = true
 
 [dependencies]
 clap = { version = "4.5.18", features = ["derive"] }
+futures-util = "0.3.31"
+reqwest = { version = "0.12.8" }
 rppal = { version = "0.19.0", optional = true }
-slotmap = "1.0.7"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
+slotmap = { version = "1.0.7", features = ["serde"] }
 thiserror = "1.0.63"
 tokio = { version = "1.40.0", features = ["full"] }
+tokio-tungstenite = "0.24.0"
+urlencoding = "2.1.3"
+uuid = { version = "1.10.0", features = ["v4"] }
 
 [features]
 default = []

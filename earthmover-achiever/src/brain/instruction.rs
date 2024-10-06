@@ -1,9 +1,11 @@
 //! Movement instructions for an Agent's Body
 
+use serde::{Deserialize, Serialize};
+
 use crate::body::PeripheralKey;
 
 /// A single instruction of movement for an Agent
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize, Deserialize)]
 pub struct Instruction {
     /// The node affected by the instruction
     pub node: PeripheralKey,

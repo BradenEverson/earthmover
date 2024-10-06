@@ -15,6 +15,8 @@ pub enum Goal<REWARD: Rewardable> {
     Maximize(REWARD),
     /// Minimize this Reward's value
     Minimize(REWARD),
+    /// A combination of goals
+    Complex(Vec<Goal<REWARD>>),
     /// No goal
     None,
 }
@@ -24,6 +26,14 @@ impl<REWARD: Rewardable> Goal<REWARD> {
     pub fn evaluate(&self) -> Option<f64> {
         match self {
             Self::Maximize(reward) | Self::Minimize(reward) => Some(reward.to_reward()),
+            Self::Complex(goals) => {
+                let mut res = 0.0;
+                for goal in goals {
+                    res += goal.evaluate()?;
+                }
+
+                Some(res)
+            }
             Self::None => None,
         }
     }
