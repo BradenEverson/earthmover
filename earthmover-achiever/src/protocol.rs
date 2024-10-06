@@ -14,6 +14,8 @@ where
 {
     /// Send a buffer of collected data points to the server in DIMS dimensions.
     Send(Vec<[f32; DIMS]>),
+    /// Connect to a session via websocket
+    Connect(Uuid),
     /// Set the current goal of the agent. That is, which index of dimension we want to
     /// maximize (true) or minimize (false).
     ///
@@ -30,6 +32,16 @@ pub enum AhtpResponse {
     Initialized(Uuid),
     /// An instruction set from the simulation server.
     Instruction(Vec<Instruction>),
+}
+
+impl AhtpResponse {
+    /// Returns the initialized ID if the type of this response is an init
+    pub fn get_init(self) -> Option<Uuid> {
+        match self {
+            Self::Initialized(id) => Some(id),
+            _ => None,
+        }
+    }
 }
 
 /// A trait to indicate that array sizes are bounded.
