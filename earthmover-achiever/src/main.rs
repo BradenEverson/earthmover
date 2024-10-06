@@ -5,8 +5,11 @@ use std::path::PathBuf;
 use clap::Parser;
 use earthmover_achiever::brain::agent::Untrained;
 use earthmover_achiever::goals::Goal;
-use earthmover_achiever::protocol::AhtpResponse;
+use earthmover_achiever::protocol::{AhtpMessage, AhtpResponse};
 use earthmover_achiever::{body::Body, brain::AgentSession};
+use futures_util::{SinkExt, StreamExt};
+use tokio_tungstenite::connect_async;
+use tokio_tungstenite::tungstenite::protocol::Message;
 
 #[derive(Parser, Debug)]
 /// Configuration for the achiever session from the CLI
@@ -72,10 +75,25 @@ pub async fn main() {
     let response_ahtp: AhtpResponse =
         serde_json::from_str(&response).expect("Failed to deserialize response");
 
-    let _id = response_ahtp
+    let id = response_ahtp
         .get_init()
         .expect("Response wasn't an initialization");
     // Now that we have ID, we can initialize a websocket connection
+
+    let ws_url = format!("ws://{}", server_to);
+    let (ws, _) = connect_async(ws_url)
+        .await
+        .expect("Failed to connect to websocket on hivemind server");
+
+    let (mut write, mut _read) = ws.split();
+
+    let connect_to_session = AhtpMessage::<3>::Connect(id)
+        .to_json_string()
+        .expect("Failed to serialize connect request");
+    write
+        .send(Message::Text(connect_to_session))
+        .await
+        .expect("Failed to send session id to hivemind socket");
 
     let _conditions_reached = false;
     loop {

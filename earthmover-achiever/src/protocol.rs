@@ -24,6 +24,16 @@ where
     Goal(Vec<(usize, bool)>),
 }
 
+impl<const DIMS: usize> AhtpMessage<DIMS>
+where
+    [f32; DIMS]: ArrayBoundedSize + Serialize + DeserializeOwned,
+{
+    /// Serializes the message as a json string
+    pub fn to_json_string(&self) -> serde_json::Result<String> {
+        serde_json::to_string(self)
+    }
+}
+
 /// A response from the simulation server.
 #[derive(Serialize, Deserialize)]
 pub enum AhtpResponse {
