@@ -1,5 +1,7 @@
 //! Physics Informed Backend Implementation
 
+use std::sync::Arc;
+
 use bevy::{
     app::{App, Startup},
     asset::Assets,
@@ -9,9 +11,10 @@ use bevy::{
     prelude::{Camera3dBundle, Commands, Cuboid, Mesh, ResMut, Resource, Transform},
     utils::default,
 };
+use earthmover_achiever::goals::Rewardable;
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::sim::SimMessage;
+use crate::sim::{SimArgs, SimMessage};
 
 use super::Simulation;
 
@@ -27,10 +30,10 @@ impl Simulation for BevyPhysicsInformedBackend {
         "Bevy-Based Physics Backend".into()
     }
 
-    fn simulate<REWARD: earthmover_achiever::goals::Rewardable>(
+    fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        _args: std::sync::Arc<crate::sim::SimArgs<REWARD>>,
-        message_sender: tokio::sync::mpsc::UnboundedSender<crate::sim::SimMessage>,
+        _args: Arc<SimArgs<REWARD, DIMS>>,
+        message_sender: tokio::sync::mpsc::UnboundedSender<SimMessage>,
     ) {
         App::new()
             .insert_resource(MessageChannel(message_sender))

@@ -35,7 +35,7 @@ pub async fn simulate<
     SIM: Simulation + Send + Sync + 'static,
 >(
     simulation_backend: SIM,
-    sim_args: Arc<SimArgs<REWARD>>,
+    sim_args: Arc<SimArgs<REWARD, N>>,
 ) -> SimRes {
     info!("Beginning simulation...");
     let mut res = SimRes::default();
@@ -74,9 +74,9 @@ struct SimpleBackend;
 
 #[cfg(test)]
 impl Simulation for SimpleBackend {
-    fn simulate<REWARD: Rewardable>(
+    fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        _args: Arc<SimArgs<REWARD>>,
+        _args: Arc<SimArgs<REWARD, DIMS>>,
         message_sender: UnboundedSender<SimMessage>,
     ) {
         let _ = tracing_subscriber::fmt::try_init();
@@ -105,9 +105,9 @@ struct SimplePhysicsBackend;
 
 #[cfg(test)]
 impl Simulation for SimplePhysicsBackend {
-    fn simulate<REWARD: Rewardable>(
+    fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        _args: Arc<SimArgs<REWARD>>,
+        _args: Arc<SimArgs<REWARD, DIMS>>,
         message_sender: UnboundedSender<SimMessage>,
     ) {
         let _ = tracing_subscriber::fmt::try_init();

@@ -7,29 +7,29 @@ use std::sync::Arc;
 use earthmover_achiever::{body::Body, brain::instruction::Instruction, goals::Rewardable};
 
 /// Any agruments that a simulation may take in
-pub struct SimArgs<REWARD: Rewardable + Send + Sync + 'static> {
+pub struct SimArgs<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize> {
     /// The simulation reward
     pub reward: REWARD,
     /// The data passed in
-    pub data: Vec<f32>,
+    pub data: Vec<[f32; DIMS]>,
     /// The agent's body
     pub body: Body,
 }
 
-impl<REWARD: Rewardable + Send + Sync + 'static> SimArgs<REWARD> {
+impl<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize> SimArgs<REWARD, DIMS> {
     /// Wraps self in an arc
-    pub fn arc(self) -> ArcSimArgs<REWARD> {
+    pub fn arc(self) -> ArcSimArgs<REWARD, DIMS> {
         Arc::new(self)
     }
 
     /// Creates a new SimArgs from raw parts
-    pub fn new(reward: REWARD, data: Vec<f32>, body: Body) -> Self {
+    pub fn new(reward: REWARD, data: Vec<[f32; DIMS]>, body: Body) -> Self {
         Self { reward, data, body }
     }
 }
 
 /// An arc-wrapped SimArg
-pub type ArcSimArgs<REWARD> = Arc<SimArgs<REWARD>>;
+pub type ArcSimArgs<REWARD, const DIMS: usize> = Arc<SimArgs<REWARD, DIMS>>;
 
 /// The output from a simulation's runtime
 #[derive(Default, Debug)]

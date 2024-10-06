@@ -14,9 +14,9 @@ use super::{SimArgs, SimMessage};
 pub trait Simulation {
     /// Runs through a simulation based on beginning arguments, reports back to a Receiver with
     /// instructions to reach a certain `Score`
-    fn simulate<REWARD: Rewardable>(
+    fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        args: Arc<SimArgs<REWARD>>,
+        args: Arc<SimArgs<REWARD, DIMS>>,
         message_sender: UnboundedSender<SimMessage>,
     );
     /// The backend's name

@@ -16,7 +16,7 @@ impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrato
     /// Submits `sim_amount` simulations to the Orchestrator for execution
     pub fn submit<REWARD: Rewardable + Sync + Send + 'static>(
         &mut self,
-        job: SimArgs<REWARD>,
+        job: SimArgs<REWARD, N>,
         sim_amount: usize,
     ) {
         info!(
