@@ -6,7 +6,10 @@ use std::{future::Future, pin::Pin, sync::Arc};
 
 use earthmover_achiever::goals::Rewardable;
 use futures::stream::FuturesUnordered;
-use sim::{backend::Simulation, SimArgs, SimMessage, SimRes};
+use sim::{
+    backend::{Simulation, ValidDimension},
+    SimArgs, SimMessage, SimRes,
+};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 #[cfg(test)]
@@ -36,7 +39,10 @@ pub async fn simulate<
 >(
     simulation_backend: SIM,
     sim_args: Arc<SimArgs<REWARD, N>>,
-) -> SimRes {
+) -> SimRes
+where
+    [f32; N]: ValidDimension,
+{
     info!("Beginning simulation...");
     let mut res = SimRes::default();
     let (sender, mut receiver): (UnboundedSender<SimMessage>, UnboundedReceiver<SimMessage>) =

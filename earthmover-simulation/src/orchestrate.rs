@@ -8,7 +8,10 @@ use indicatif::{ProgressBar, ProgressStyle};
 use tracing::info;
 
 use crate::{
-    sim::{backend::Simulation, SimArgs, SimRes},
+    sim::{
+        backend::{Simulation, ValidDimension},
+        SimArgs, SimRes,
+    },
     simulate, Orchestrator,
 };
 
@@ -18,7 +21,9 @@ impl<const N: usize, SIM: Simulation + Send + Sync + Copy + 'static> Orchestrato
         &mut self,
         job: SimArgs<REWARD, N>,
         sim_amount: usize,
-    ) {
+    ) where
+        [f32; N]: ValidDimension,
+    {
         info!(
             "Submitting {sim_amount} simulation requests to backend {}",
             self.simulation_backend.name()
