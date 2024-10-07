@@ -6,7 +6,10 @@ use std::{future::Future, pin::Pin, sync::Arc};
 
 use earthmover_achiever::goals::Rewardable;
 use futures::stream::FuturesUnordered;
-use sim::{backend::Simulation, SimArgs, SimMessage, SimRes};
+use sim::{
+    backend::{Simulation, ValidDimension},
+    SimArgs, SimMessage, SimRes,
+};
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 #[cfg(test)]
@@ -35,8 +38,11 @@ pub async fn simulate<
     SIM: Simulation + Send + Sync + 'static,
 >(
     simulation_backend: SIM,
-    sim_args: Arc<SimArgs<REWARD>>,
-) -> SimRes {
+    sim_args: Arc<SimArgs<REWARD, N>>,
+) -> SimRes
+where
+    [f32; N]: ValidDimension,
+{
     info!("Beginning simulation...");
     let mut res = SimRes::default();
     let (sender, mut receiver): (UnboundedSender<SimMessage>, UnboundedReceiver<SimMessage>) =
@@ -74,9 +80,9 @@ struct SimpleBackend;
 
 #[cfg(test)]
 impl Simulation for SimpleBackend {
-    fn simulate<REWARD: Rewardable>(
+    fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        _args: Arc<SimArgs<REWARD>>,
+        _args: Arc<SimArgs<REWARD, DIMS>>,
         message_sender: UnboundedSender<SimMessage>,
     ) {
         let _ = tracing_subscriber::fmt::try_init();
@@ -105,9 +111,9 @@ struct SimplePhysicsBackend;
 
 #[cfg(test)]
 impl Simulation for SimplePhysicsBackend {
-    fn simulate<REWARD: Rewardable>(
+    fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        _args: Arc<SimArgs<REWARD>>,
+        _args: Arc<SimArgs<REWARD, DIMS>>,
         message_sender: UnboundedSender<SimMessage>,
     ) {
         let _ = tracing_subscriber::fmt::try_init();
