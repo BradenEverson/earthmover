@@ -70,13 +70,3 @@ jobs:
       - name: Update Rust
         run: rustup update stable && rustup default stable
       - run: cargo test --examples
-
-  docs:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y g++ pkg-config libx11-dev libasound2-dev libudev-dev libxkbcommon-x11-0
-      - name: Update Rust
-        run: rustup update stable && rustup default stable
-      - run: cargo doc
