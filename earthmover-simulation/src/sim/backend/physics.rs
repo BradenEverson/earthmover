@@ -87,12 +87,12 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
     }
 
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(-2.0, -2.0, 0.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, -2.0, 1.0).looking_at(Vec3::ZERO, Vec3::Z),
         ..default()
     });
 
     commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Z),
         ..default()
     });
 }
