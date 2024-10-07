@@ -4,6 +4,7 @@ pub mod backend;
 
 use std::sync::Arc;
 
+use bevy::prelude::Resource;
 use earthmover_achiever::{body::Body, brain::instruction::Instruction, goals::Rewardable};
 
 /// Any agruments that a simulation may take in
@@ -19,7 +20,7 @@ pub struct SimArgs<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize
 impl<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize> SimArgs<REWARD, DIMS> {
     /// Wraps self in an arc
     pub fn arc(self) -> ArcSimArgs<REWARD, DIMS> {
-        Arc::new(self)
+        ArcSimArgs(Arc::new(self))
     }
 
     /// Creates a new SimArgs from raw parts
@@ -29,7 +30,10 @@ impl<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize> SimArgs<REWA
 }
 
 /// An arc-wrapped SimArg
-pub type ArcSimArgs<REWARD, const DIMS: usize> = Arc<SimArgs<REWARD, DIMS>>;
+#[derive(Resource)]
+pub struct ArcSimArgs<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize>(
+    pub Arc<SimArgs<REWARD, DIMS>>,
+);
 
 /// The output from a simulation's runtime
 #[derive(Default, Debug)]

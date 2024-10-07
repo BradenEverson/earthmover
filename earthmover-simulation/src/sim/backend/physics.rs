@@ -12,15 +12,24 @@ use bevy::{
     utils::default,
 };
 use earthmover_achiever::goals::Rewardable;
+use std::collections::HashMap;
 use tokio::sync::mpsc::UnboundedSender;
 
-use crate::sim::{SimArgs, SimMessage};
+use crate::sim::{ArcSimArgs, SimArgs, SimMessage};
 
 use super::Simulation;
 
 /// A Bevy Resource for the Mpsc Channel
 #[derive(Resource)]
 pub struct MessageChannel(pub UnboundedSender<SimMessage>);
+
+/// All data held in a single training context. Including mappings from 3 space to peripheral
+/// readings
+#[derive(Default, Resource)]
+pub struct TrainContext<const DIMS: usize> {
+    /// 3-space points to peripheral readings at that point
+    pub points_to_peripherals: HashMap<(f32, f32, f32), [f32; DIMS]>,
+}
 
 /// A Physics Informed Backend Runner
 pub struct BevyPhysicsInformedBackend;
@@ -32,11 +41,13 @@ impl Simulation for BevyPhysicsInformedBackend {
 
     fn simulate<REWARD: Rewardable, const DIMS: usize>(
         &self,
-        _args: Arc<SimArgs<REWARD, DIMS>>,
+        args: Arc<SimArgs<REWARD, DIMS>>,
         message_sender: tokio::sync::mpsc::UnboundedSender<SimMessage>,
     ) {
         App::new()
             .insert_resource(MessageChannel(message_sender))
+            .insert_resource(ArcSimArgs(args))
+            .insert_resource(TrainContext::<DIMS>::default())
             .add_systems(Startup, setup)
             .run();
     }
