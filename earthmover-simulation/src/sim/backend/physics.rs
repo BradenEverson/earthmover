@@ -92,7 +92,7 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
                 PbrBundle {
                     mesh: mesh_handle.clone(),
                     material: material_handle,
-                    transform: Transform::from_translation(Vec3::new(point[0], point[1], point[2])),
+                    transform: Transform::from_xyz(point[0], point[1], point[2]),
                     ..default()
                 },
                 Collider::cuboid(0.01, 0.01, 0.01),
