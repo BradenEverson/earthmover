@@ -60,30 +60,35 @@ impl Simulation for BevyPhysicsInformedBackend {
 /// Sets up the bevy simulation world with respect to the points provided
 #[allow(unused_attributes)]
 #[allow(elided_lifetimes_in_paths)]
+/// Sets up the Bevy simulation world with respect to the points provided
 fn setup<REWARD: Rewardable, const DIMS: usize>(
     mut commands: Commands,
     args: Res<ArcSimArgs<REWARD, DIMS>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mesh = meshes.add(Mesh::from(Cuboid::new(0.01, 0.01, 0.01)));
+    let mesh_handle = meshes.add(Mesh::from(Cuboid::new(0.01, 0.01, 0.01)));
+    let mut color_materials = std::collections::HashMap::new();
 
-    let entities: Vec<_> = args
+    let points: Vec<_> = args
         .0
         .data
         .iter()
         .map(|point| {
-            let point_in_3_space = Vec3::new(point[0], point[1], point[2]);
-            let last = point.len() - 1;
-            let r = point[last - 2];
-            let g = point[last - 1];
-            let b = point[last];
+            let (r, g, b) = (point[DIMS - 3], point[DIMS - 2], point[DIMS - 1]);
+
+            let color_key = ((r * 10f32) as u32, (g * 10f32) as u32, (b * 10f32) as u32);
+
+            let material_handle = color_materials
+                .entry(color_key)
+                .or_insert_with(|| materials.add(Color::srgb(r, g, b)))
+                .clone();
 
             (
                 PbrBundle {
-                    mesh: mesh.clone(),
-                    material: materials.add(Color::srgb(r, g, b)),
-                    transform: Transform::from_translation(point_in_3_space),
+                    mesh: mesh_handle.clone(),
+                    material: material_handle,
+                    transform: Transform::from_translation(Vec3::new(point[0], point[1], point[2])),
                     ..default()
                 },
                 Collider::cuboid(0.01, 0.01, 0.01),
@@ -91,7 +96,7 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
         })
         .collect();
 
-    commands.spawn_batch(entities);
+    commands.spawn_batch(points);
 
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0.0, -2.0, 1.0).looking_at(Vec3::ZERO, Vec3::Z),
