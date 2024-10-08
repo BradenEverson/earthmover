@@ -66,25 +66,32 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for point in &args.0.data {
-        let point_in_3_space = Vec3::new(point[0], point[1], point[2]);
+    let mesh = meshes.add(Mesh::from(Cuboid::new(0.01, 0.01, 0.01)));
 
-        // If DIMS is higher than 3, the color of the point will correspond to the higher
-        // dimension peripheral readings
-        let last = point.len() - 1;
-        let r = point[last - 2];
-        let g = point[last - 1];
-        let b = point[last];
+    let entities: Vec<_> = args
+        .0
+        .data
+        .iter()
+        .map(|point| {
+            let point_in_3_space = Vec3::new(point[0], point[1], point[2]);
+            let last = point.len() - 1;
+            let r = point[last - 2];
+            let g = point[last - 1];
+            let b = point[last];
 
-        commands
-            .spawn(PbrBundle {
-                mesh: meshes.add(Mesh::from(Cuboid::new(0.01, 0.01, 0.01))),
-                material: materials.add(Color::srgb(r, g, b)),
-                transform: Transform::from_translation(point_in_3_space),
-                ..default()
-            })
-            .insert(Collider::cuboid(0.01, 0.01, 0.01));
-    }
+            (
+                PbrBundle {
+                    mesh: mesh.clone(),
+                    material: materials.add(Color::srgb(r, g, b)),
+                    transform: Transform::from_translation(point_in_3_space),
+                    ..default()
+                },
+                Collider::cuboid(0.01, 0.01, 0.01),
+            )
+        })
+        .collect();
+
+    commands.spawn_batch(entities);
 
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0.0, -2.0, 1.0).looking_at(Vec3::ZERO, Vec3::Z),

@@ -17,7 +17,7 @@ pub fn main() {
     let mut data = vec![];
 
     let mut rng = thread_rng();
-    for _ in 0..10_000 {
+    for _ in 0..100_000 {
         let x = rng.gen_range(-2f32..2f32);
         let y = rng.gen_range(0f32..4f32);
         let z = f32::cos(2.0 * (x + y)) / 5.0;
