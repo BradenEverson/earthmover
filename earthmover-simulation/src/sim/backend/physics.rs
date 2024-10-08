@@ -60,31 +60,43 @@ impl Simulation for BevyPhysicsInformedBackend {
 /// Sets up the bevy simulation world with respect to the points provided
 #[allow(unused_attributes)]
 #[allow(elided_lifetimes_in_paths)]
+/// Sets up the Bevy simulation world with respect to the points provided
 fn setup<REWARD: Rewardable, const DIMS: usize>(
     mut commands: Commands,
     args: Res<ArcSimArgs<REWARD, DIMS>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for point in &args.0.data {
-        let point_in_3_space = Vec3::new(point[0], point[1], point[2]);
+    let mesh_handle = meshes.add(Mesh::from(Cuboid::new(0.01, 0.01, 0.01)));
+    let mut color_materials = std::collections::HashMap::new();
 
-        // If DIMS is higher than 3, the color of the point will correspond to the higher
-        // dimension peripheral readings
-        let last = point.len() - 1;
-        let r = point[last - 2];
-        let g = point[last - 1];
-        let b = point[last];
+    let points: Vec<_> = args
+        .0
+        .data
+        .iter()
+        .map(|point| {
+            let (r, g, b) = (point[DIMS - 3], point[DIMS - 2], point[DIMS - 1]);
 
-        commands
-            .spawn(PbrBundle {
-                mesh: meshes.add(Mesh::from(Cuboid::new(0.01, 0.01, 0.01))),
-                material: materials.add(Color::srgb(r, g, b)),
-                transform: Transform::from_translation(point_in_3_space),
-                ..default()
-            })
-            .insert(Collider::cuboid(0.01, 0.01, 0.01));
-    }
+            let color_key = ((r * 10f32) as u32, (g * 10f32) as u32, (b * 10f32) as u32);
+
+            let material_handle = color_materials
+                .entry(color_key)
+                .or_insert_with(|| materials.add(Color::srgb(r, g, b)))
+                .clone();
+
+            (
+                PbrBundle {
+                    mesh: mesh_handle.clone(),
+                    material: material_handle,
+                    transform: Transform::from_translation(Vec3::new(point[0], point[1], point[2])),
+                    ..default()
+                },
+                Collider::cuboid(0.01, 0.01, 0.01),
+            )
+        })
+        .collect();
+
+    commands.spawn_batch(points);
 
     commands.spawn(Camera3dBundle {
         transform: Transform::from_xyz(0.0, -2.0, 1.0).looking_at(Vec3::ZERO, Vec3::Z),
