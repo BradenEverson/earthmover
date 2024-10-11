@@ -1,7 +1,7 @@
 //! Example for running off a raspberry pi with UART Rx and Tx pins connected to the RpLidar and
 //! the motor signal at gpio pin 18
 
-use rplidar::rplidar_a1::RpLidarA1;
+use rplidar_rppal::rplidar_a1::RpLidarA1;
 use rppal::gpio::Gpio;
 use rppal::uart::{Parity, Uart};
 use std::time::Duration;
