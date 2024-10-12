@@ -4,6 +4,8 @@ use std::time::Duration;
 
 use rppal::{gpio::OutputPin, uart::Uart};
 
+
+
 /// An RpLidar A1 Device
 pub struct RpLidarA1 {
     /// The UART channel connected to the RpLidar
@@ -70,5 +72,10 @@ impl RpLidarA1 {
 
         self.motor.set_low();
         self.send_command(Command::Stop);
+    }
+
+    #[cfg(feature = "tokio")]
+    pub fn run_with_channel(&mut self) -> tokio::sync::mpsc::Receiver<([u8; 255], u8)> {
+        todo!()
     }
 }
