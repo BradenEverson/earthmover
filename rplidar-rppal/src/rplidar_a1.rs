@@ -52,7 +52,7 @@ impl RpLidarA1 {
     /// Continously reads lidar data until a failure happens. Pipes the data through to a
     /// `response_callback` function that does something to a `&[u8]` allowing fine-grained control
     /// over data response
-    pub fn run_with_callback<FN: Fn(&[u8])>(mut self, response_callback: FN) {
+    pub fn run_with_callback<FN: Fn([u8; 255], u8)>(&mut self, response_callback: FN) {
         self.motor.set_high();
 
         self.send_command(Command::Reset);
@@ -63,12 +63,26 @@ impl RpLidarA1 {
         let mut buffer: [u8; 255] = [0; 255];
         loop {
             match self.uart.read(&mut buffer) {
-                Ok(bytes_read) if bytes_read > 0 => response_callback(&buffer),
+                Ok(bytes_read) if bytes_read > 0 => response_callback(buffer, bytes_read as u8),
                 _ => break,
             }
         }
 
         self.motor.set_low();
         self.send_command(Command::Stop);
+    }
+
+    #[cfg(feature = "tokio")]
+    pub fn run_with_channel(&mut self) -> tokio::sync::mpsc::UnboundedReceiver<([u8; 255], u8)> {
+        let (writer, reader) = tokio::sync::mpsc::unbounded_channel();
+
+        let handler = move |buf: [u8; 255], read: u8| {
+            let writer = writer.clone();
+            writer.send((buf, read)).expect("Failed to send");
+        };
+
+        self.run_with_callback(handler);
+
+        reader
     }
 }
