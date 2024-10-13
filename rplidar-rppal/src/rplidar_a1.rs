@@ -4,8 +4,6 @@ use std::time::Duration;
 
 use rppal::{gpio::OutputPin, uart::Uart};
 
-
-
 /// An RpLidar A1 Device
 pub struct RpLidarA1 {
     /// The UART channel connected to the RpLidar
@@ -54,7 +52,7 @@ impl RpLidarA1 {
     /// Continously reads lidar data until a failure happens. Pipes the data through to a
     /// `response_callback` function that does something to a `&[u8]` allowing fine-grained control
     /// over data response
-    pub fn run_with_callback<FN: Fn(&[u8])>(mut self, response_callback: FN) {
+    pub fn run_with_callback<FN: Fn([u8; 255], u8)>(&mut self, response_callback: FN) {
         self.motor.set_high();
 
         self.send_command(Command::Reset);
@@ -65,7 +63,7 @@ impl RpLidarA1 {
         let mut buffer: [u8; 255] = [0; 255];
         loop {
             match self.uart.read(&mut buffer) {
-                Ok(bytes_read) if bytes_read > 0 => response_callback(&buffer),
+                Ok(bytes_read) if bytes_read > 0 => response_callback(buffer, bytes_read as u8),
                 _ => break,
             }
         }
@@ -75,7 +73,16 @@ impl RpLidarA1 {
     }
 
     #[cfg(feature = "tokio")]
-    pub fn run_with_channel(&mut self) -> tokio::sync::mpsc::Receiver<([u8; 255], u8)> {
-        todo!()
+    pub fn run_with_channel(&mut self) -> tokio::sync::mpsc::UnboundedReceiver<([u8; 255], u8)> {
+        let (writer, reader) = tokio::sync::mpsc::unbounded_channel();
+
+        let handler = move |buf: [u8; 255], read: u8| {
+            let writer = writer.clone();
+            writer.send((buf, read)).expect("Failed to send");
+        };
+
+        self.run_with_callback(handler);
+
+        reader
     }
 }

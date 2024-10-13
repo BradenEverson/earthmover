@@ -20,12 +20,12 @@ fn main() {
     uart.set_read_mode(255, Duration::from_millis(500))
         .expect("Failed to set timeout");
 
-    let lidar = RpLidarA1::new(uart, motor_pin);
+    let mut lidar = RpLidarA1::new(uart, motor_pin);
     lidar.run_with_callback(parse_scan_data);
 }
 
 /// Scans the lidar data and prints the readings to the console
-pub fn parse_scan_data(data: &[u8]) {
+pub fn parse_scan_data(data: [u8; 255], _read: u8) {
     if data.len() < 5 {
         return;
     }
