@@ -60,6 +60,10 @@ unsafe impl Send for Body {}
 unsafe impl Sync for Body {}
 
 impl Body {
+    pub fn new(urdf: Option<Robot>, peripheral_graph: SlotMap<PeripheralKey, PeripheralNode>, root: Vec<PeripheralKey>) -> Self {
+        Self { root, peripheral_graph, urdf }
+    }
+
     /// Returns all input nodes
     pub fn inputs(&self) -> Vec<&PeripheralNode> {
         self.peripheral_graph
