@@ -2,14 +2,18 @@
 
 use std::{collections::HashMap, path::Path};
 
-use earthmover_achiever::body::{Body, PeripheralKey, PeripheralNode};
+use earthmover_achiever::body::{Body, Peripheral, PeripheralKey, PeripheralNode};
 use slotmap::SlotMap;
+
+// TODO: Metadata still needed:
+// * Peripheral to Pin mappings (name -> GPIO)
+// * Peripheral to Peripheral type mappings
 
 /// Loads a full body context with physical urdf
 pub fn load_body<P: AsRef<Path>>(urdf_path: P) -> urdf_rs::Result<Body> {
     let robot = urdf_rs::read_file(urdf_path)?;
-    let peripheral_graph: SlotMap<PeripheralKey, PeripheralNode> = SlotMap::default();
-    let root = vec![];
+    let mut peripheral_graph: SlotMap<PeripheralKey, PeripheralNode> = SlotMap::default();
+    let mut root = vec![];
 
     let mut name_link_lookup = HashMap::new();
 
@@ -19,10 +23,20 @@ pub fn load_body<P: AsRef<Path>>(urdf_path: P) -> urdf_rs::Result<Body> {
     }
 
     for joint in robot.joints.iter() {
-        
+        let peripheral = default_peripheral_from_hw();
+        let joint_peripheral: PeripheralNode = peripheral.into();
+
+        if !name_link_lookup.contains_key(&joint.parent.link) {
+            let id = peripheral_graph.insert(joint_peripheral);
+            root.push(id)
+        } else {
+            
+        }
     }
 
-    Body::new(Some(robot), peripheral_graph, root);
+    Ok(Body::new(Some(robot), peripheral_graph, root))
+}
 
+fn default_peripheral_from_hw() -> Peripheral {
     todo!()
 }
