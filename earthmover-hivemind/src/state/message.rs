@@ -6,12 +6,12 @@ use uuid::Uuid;
 /// A message receiver for the message enum
 pub type MessageReceiver = tokio::sync::mpsc::UnboundedReceiver<Message>;
 /// A message sender for the message enum
-pub type MessageSender = tokio::sync::mpsc::UnboundedReceiver<Message>;
+pub type MessageSender = tokio::sync::mpsc::UnboundedSender<Message>;
 
 /// A response receiver for the response enum
 pub type ResponseReceiver = tokio::sync::mpsc::UnboundedReceiver<Response>;
 /// A response sender for the response enum
-pub type ResponseSender = tokio::sync::mpsc::UnboundedReceiver<Response>;
+pub type ResponseSender = tokio::sync::mpsc::UnboundedSender<Response>;
 
 /// All variants that a message can be, including connection requests and existing user contexts
 pub enum Message {

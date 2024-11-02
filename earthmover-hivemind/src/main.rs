@@ -1,15 +1,14 @@
 //! The server crate responsible for handling incoming data and simulating physics of the
 //! environment
 
-use earthmover_hivemind::{service::ServerService, state::ServerState};
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
-use std::sync::Arc;
-use tokio::{net::TcpListener, sync::RwLock};
+use tokio::net::TcpListener;
+use earthmover_hivemind::new_state;
 
 #[tokio::main]
 async fn main() {
-    let state = Arc::new(RwLock::new(ServerState::default()));
+    let (state, service) = new_state();
 
     let listener = TcpListener::bind("0.0.0.0:1940").await.unwrap();
     println!(
@@ -19,7 +18,6 @@ async fn main() {
 
     let state_clone = state.clone();
     let connection_handler = async move {
-        let state = state_clone.clone();
         loop {
             // Handle connections
             let (socket, _) = listener
@@ -29,11 +27,10 @@ async fn main() {
 
             let io = TokioIo::new(socket);
 
-            let server_service = ServerService::new(state.clone());
-
+            let service = service.clone();
             tokio::spawn(async move {
                 if let Err(e) = http1::Builder::new()
-                    .serve_connection(io, server_service)
+                    .serve_connection(io, service)
                     .await
                 {
                     eprintln!("Error serving connection: {}", e);
