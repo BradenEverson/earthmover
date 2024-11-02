@@ -15,6 +15,9 @@ pub struct ServerState {
 impl ServerState {
     /// Creates a new state
     pub fn new(message_queue: MessageReceiver, response_sender: ResponseSender) -> Self {
-        Self { message_queue, response_sender }
+        Self {
+            message_queue,
+            response_sender,
+        }
     }
 }
