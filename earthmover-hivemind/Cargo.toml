@@ -5,3 +5,24 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
+futures-util = { version = "0.3.30", features = ["tokio-io"] }
+http-body-util = "0.1.2"
+hyper = { version = "1.4.1", features = ["full"] }
+hyper-tungstenite = "0.14.0"
+hyper-util = { version = "0.1.6", features = ["full", "tokio"] }
+tokio = { version = "1.39.2", features = ["full"] }
+uuid = { version = "1.11.0", features = ["v4"] }
+earthmover-achiever = { path = "../earthmover-achiever" }
+
+[lints.rust]
+missing_docs = "warn"
+nonstandard-style = "warn"
+rust-2018-idioms = "warn"
+rust-2021-compatibility = "warn"
+rust-2024-compatibility = "warn"
+
+[lints.rustdoc]
+broken_intra_doc_links = "warn"
+
+[lints.clippy]
+missing_docs_in_private_items = "warn"
