@@ -11,3 +11,5 @@ hyper = { version = "1.4.1", features = ["full"] }
 hyper-tungstenite = "0.14.0"
 hyper-util = { version = "0.1.6", features = ["full", "tokio"] }
 tokio = { version = "1.39.2", features = ["full"] }
+uuid = { version = "1.11.0", features = ["v4"] }
+earthmover-achiever = { path = "../earthmover-achiever" }
