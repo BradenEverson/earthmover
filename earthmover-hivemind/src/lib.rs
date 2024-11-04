@@ -8,7 +8,8 @@ pub mod service;
 pub mod state;
 
 /// Creates a new State and State Service linked together by message and response channels
-pub fn new_state<REWARD: Rewardable + Default>() -> (MessageReceiver, ServerState<REWARD>, ServerService) {
+pub fn new_state<REWARD: Rewardable + Default>(
+) -> (MessageReceiver, ServerState<REWARD>, ServerService) {
     let (msg_sender, msg_reader) = tokio::sync::mpsc::unbounded_channel();
 
     let state = ServerState::default();

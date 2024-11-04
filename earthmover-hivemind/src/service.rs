@@ -13,11 +13,7 @@ pub struct ServerService {
 
 impl ServerService {
     /// Creates a new service instance
-    pub fn new(
-        message_sender: MessageSender,
-    ) -> Self {
-        Self {
-            message_sender,
-        }
+    pub fn new(message_sender: MessageSender) -> Self {
+        Self { message_sender }
     }
 }

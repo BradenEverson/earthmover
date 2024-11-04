@@ -1,8 +1,10 @@
 //! The server crate responsible for handling incoming data and simulating physics of the
 //! environment
 
-
-use earthmover_hivemind::{new_state, state::message::{Message, Response}};
+use earthmover_hivemind::{
+    new_state,
+    state::message::{Message, Response},
+};
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
@@ -40,19 +42,21 @@ async fn main() {
         match msg {
             Message::Connection(id, res_channel) => {
                 state.new_session(id, res_channel);
-            },
-            Message::SetDims(id, dims) => {
-
-            },
-            Message::Goal(id, goal) => {
+            }
+            Message::SetDims(id, dims) => state[&id].set_dims(dims),
+            Message::Goal(_id, _goal) => {
                 todo!();
-            },
+            }
             Message::SendData(id, buf) => state[&id].write(&buf),
             Message::Train(id) => {
                 if state[&id].train().is_none() {
-                    state[&id].send(Response::TrainError("Not all agent attributes have been set yet")).expect("Failed to send message to response channel");
+                    state[&id]
+                        .send(Response::TrainError(
+                            "Not all agent attributes have been set yet",
+                        ))
+                        .expect("Failed to send message to response channel");
                 }
-            },
+            }
             Message::Disconnection => {}
         }
     }
