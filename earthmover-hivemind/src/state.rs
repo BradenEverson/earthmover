@@ -5,10 +5,7 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use earthmover_achiever::{
-    body::Body,
-    goals::{Goal, Rewardable},
-};
+use earthmover_achiever::{body::Body, goals::Rewardable};
 use earthmover_simulation::{sim::backend::physics::BevyPhysicsInformedBackend, Orchestrator};
 use message::{Response, ResponseSender};
 use uuid::Uuid;
@@ -54,7 +51,7 @@ pub struct Connection<REWARD: Rewardable> {
     /// Simulation dimensions
     dims: usize,
     /// Current goal
-    goal: Option<Goal<REWARD>>,
+    goal: Option<REWARD>,
     /// Current body
     body: Option<Body>,
     /// Current data read in

@@ -4,7 +4,7 @@ use std::{error::Error, marker::PhantomData, time::Duration};
 
 use crate::{
     body::{Body, Peripheral},
-    goals::{Goal, Rewardable},
+    goals::Rewardable,
 };
 
 use super::{buffer::DataBuffer, instruction::Instruction};
@@ -24,7 +24,7 @@ pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 /// The response will then be a finished AgentSession that can be attempted to run in the field!
 pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize> {
     /// The goal of the agent
-    goal: Goal<REWARD>,
+    goal: REWARD,
     /// A reference to the agent's hardware
     body: &'agent mut Body,
     /// The data collection buffer
@@ -44,8 +44,8 @@ impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
     }
 
     /// Gets the current reward of the agent session
-    pub fn get_reward(&self) -> Option<f64> {
-        self.goal.evaluate()
+    pub fn get_reward(&self) -> f64 {
+        self.goal.to_reward()
     }
 
     /// Returns a reference to the agent's hardware
@@ -88,7 +88,7 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
 /// directions bytes, preventing them from being runnable
 pub struct Builder<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> {
     /// The goal
-    goal: Option<Goal<REWARD>>,
+    goal: Option<REWARD>,
     /// A reference to the agent's hardware
     body: Option<&'agent mut Body>,
 }
@@ -106,7 +106,7 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Default
 
 impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Builder<'agent, REWARD, BUFFER_SIZE> {
     /// Set an agent's goal
-    pub fn with_goal(mut self, goal: Goal<REWARD>) -> Self {
+    pub fn with_goal(mut self, goal: REWARD) -> Self {
         self.goal = Some(goal);
         self
     }
