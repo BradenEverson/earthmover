@@ -5,16 +5,16 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-bevy = "0.14.2"
-bevy_rapier3d = "0.27.0"
-futures = "0.3.30"
-earthmover-achiever = { path = "../earthmover-achiever" }
-tokio = { version = "1.40.0", features = ["full"] }
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
-rapier3d = "0.22.0"
-indicatif = "0.17.8"
-rand = "0.8.5"
+bevy = { workspace = true }
+bevy_rapier3d =  { workspace = true }
+futures = { workspace = true }
+earthmover-achiever = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+rapier3d = { workspace = true }
+indicatif = { workspace = true } 
+rand = { workspace = true }
 
 [dev-dependencies]
 rand = "0.8.5"

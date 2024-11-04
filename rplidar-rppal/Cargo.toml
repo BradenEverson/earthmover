@@ -11,8 +11,8 @@ keywords = ["uart", "rppal", "raspberry-pi", "lidar"]
 categories = ["embedded", "hardware-support"]
 
 [dependencies]
-rppal = "0.19.0"
-tokio = { version = "1.40.0", features = ["full"], optional = true}
+rppal = { workspace = true }
+tokio = { workspace = true, optional = true}
 
 [features]
 default = ["tokio"]
