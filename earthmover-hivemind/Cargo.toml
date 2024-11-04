@@ -13,6 +13,9 @@ hyper-util = { workspace = true }
 tokio = { workspace = true }
 uuid = { workspace = true }
 earthmover-achiever = { workspace = true }
+earthmover-simulation = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 [lints.rust]
 missing_docs = "warn"

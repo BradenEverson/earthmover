@@ -4,12 +4,16 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use earthmover_achiever::brain::agent::Untrained;
-use earthmover_achiever::goals::Goal;
+use earthmover_achiever::goals::multi_dim::PositionContextualReward;
+use earthmover_achiever::goals::Rewardable;
 use earthmover_achiever::protocol::{AhtpMessage, AhtpResponse};
 use earthmover_achiever::{body::Body, brain::AgentSession};
 use futures_util::{SinkExt, StreamExt};
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::protocol::Message;
+
+/// Dimensions
+pub const DIMS: usize = 3;
 
 #[derive(Parser, Debug)]
 /// Configuration for the achiever session from the CLI
@@ -30,7 +34,7 @@ struct Config {
 
 impl Config {
     /// Parses a config into an agent's Body and Goals
-    pub fn get_body_and_goals(&self) -> (Option<Body>, Option<Goal<f32>>) {
+    pub fn get_body_and_goals<REWARD: Rewardable>(&self) -> (Option<Body>, REWARD) {
         todo!()
     }
 }
@@ -42,9 +46,8 @@ pub async fn main() {
     let args = Config::parse();
 
     //Todo: Parse These Args into a Body and a Goal
-    let (body, goals) = args.get_body_and_goals();
+    let (body, goals): (_, PositionContextualReward<DIMS>) = args.get_body_and_goals();
     let mut body = body.unwrap();
-    let goals = goals.unwrap();
 
     let _threshold = args.threshold;
     let server_to = args.server.unwrap_or("0.0.0.0:1940".into());
