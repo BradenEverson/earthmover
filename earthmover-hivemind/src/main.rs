@@ -8,7 +8,7 @@ use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    let (_state, service) = new_state();
+    let (mut msg_queue, _state, service) = new_state();
 
     let listener = TcpListener::bind("0.0.0.0:1940").await.unwrap();
     println!(
@@ -16,7 +16,7 @@ async fn main() {
         listener.local_addr().unwrap().port()
     );
 
-    let connection_handler = async move {
+    tokio::spawn(async move {
         loop {
             // Handle connections
             let (socket, _) = listener
@@ -33,7 +33,11 @@ async fn main() {
                 }
             });
         }
-    };
+    });
 
-    connection_handler.await
+    while let Some(msg) = msg_queue.recv().await {
+        match msg {
+            _ => todo!()
+        }
+    }
 }
