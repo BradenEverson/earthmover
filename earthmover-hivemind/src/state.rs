@@ -5,9 +5,9 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use earthmover_achiever::{body::Body, goals::Rewardable};
+use earthmover_achiever::{body::Body, goals::multi_dim::PositionContextualReward};
 use earthmover_simulation::{
-    sim::{backend::physics::BevyPhysicsInformedBackend, SimArgs},
+    sim::{backend::physics::BevyPhysicsInformedBackend, SimArgs, SimRes},
     Orchestrator,
 };
 use message::{Response, ResponseSender};
@@ -22,53 +22,50 @@ pub const NUM_DIMS: usize = 3;
 
 /// The current server's state
 #[derive(Default)]
-pub struct ServerState<REWARD: Rewardable> {
+pub struct ServerState {
     /// The sessions this state is aware of
-    sessions: HashMap<Uuid, Connection<REWARD>>,
+    sessions: HashMap<Uuid, Connection>,
 }
 
-impl<REWARD: Rewardable + Copy + 'static> ServerState<REWARD> {
+impl ServerState {
     /// Adds a new session to the internal sessions
     pub fn new_session(&mut self, id: Uuid, channel: ResponseSender) {
         self.sessions.insert(id, Connection::new(channel));
     }
 }
 
-impl<REWARD: Rewardable> Index<&Uuid> for ServerState<REWARD> {
-    type Output = Connection<REWARD>;
+impl Index<&Uuid> for ServerState {
+    type Output = Connection;
     fn index(&self, index: &Uuid) -> &Self::Output {
         &self.sessions[index]
     }
 }
 
-impl<REWARD: Rewardable> IndexMut<&Uuid> for ServerState<REWARD> {
+impl IndexMut<&Uuid> for ServerState {
     fn index_mut(&mut self, index: &Uuid) -> &mut Self::Output {
         self.sessions.get_mut(index).unwrap()
     }
 }
 
 /// A current connection session
-pub struct Connection<REWARD: Rewardable> {
+pub struct Connection {
     /// Where to send response messages
     response_channel: ResponseSender,
     /// Simulation dimensions
     dims: usize,
     /// Current goal
-    goal: Option<REWARD>,
-    /// Current body
-    body: Option<Body>,
+    goal: PositionContextualReward<NUM_DIMS>,
     /// Current data read in
     buf: Vec<f32>,
 }
 
-impl<REWARD: Rewardable + Copy + 'static> Connection<REWARD> {
+impl Connection {
     /// Creates a new connection with just a response channel
     pub fn new(response_channel: ResponseSender) -> Self {
         Self {
             response_channel,
             dims: 0,
-            goal: None,
-            body: None,
+            goal: PositionContextualReward::default(),
             buf: vec![],
         }
     }
@@ -76,6 +73,11 @@ impl<REWARD: Rewardable + Copy + 'static> Connection<REWARD> {
     /// Sets the dims for this session
     pub fn set_dims(&mut self, dims: usize) {
         self.dims = dims
+    }
+
+    /// Sets the goals for the current session
+    pub fn set_goals(&mut self, goals: Vec<(usize, bool)>) {
+        self.goal.update(goals)
     }
 
     /// Sends a response to the underlying client
@@ -92,21 +94,17 @@ impl<REWARD: Rewardable + Copy + 'static> Connection<REWARD> {
     }
 
     /// Begins training the agent
-    pub async fn train(&mut self) -> Option<()> {
-        if self.goal.is_none() || self.body.is_none() {
-            return None;
-        }
-
+    pub async fn train(&mut self) -> Option<SimRes> {
         let mut orchestrator: Orchestrator<BevyPhysicsInformedBackend, NUM_DIMS> =
             Orchestrator::new(BevyPhysicsInformedBackend);
 
         let body = Body::default();
-        let job: SimArgs<REWARD, NUM_DIMS> = SimArgs::new(self.goal.unwrap(), vec![], body);
+        let job: SimArgs<_, NUM_DIMS> = SimArgs::new(self.goal, vec![], body);
 
         orchestrator.submit(job, NUM_SIMS);
 
-        let _best_fit = orchestrator.run().await;
+        let best_fit = orchestrator.run().await;
 
-        Some(())
+        Some(best_fit)
     }
 }
