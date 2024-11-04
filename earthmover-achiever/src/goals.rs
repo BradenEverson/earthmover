@@ -17,10 +17,16 @@ pub enum Goal {
     Maximize,
     /// Minimize this Reward's value
     Minimize,
-    /// A combination of goals
-    Complex(Vec<Goal>),
-    /// No goal
-    None,
+}
+
+impl Goal {
+    /// Matches the goal and returns a score based on distance away from the point
+    pub fn match_against(&self, val: f64, ceiling: f64) -> f64 {
+        match *self {
+            Self::Maximize => -((ceiling - val).abs()),
+            Self::Minimize => (ceiling - val).abs()
+        }
+    }
 }
 
 /// Basic implementations of reward function for primitive types that make sense
