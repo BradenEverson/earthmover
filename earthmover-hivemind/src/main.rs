@@ -8,10 +8,11 @@ use earthmover_hivemind::{
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
+use tracing::info;
 
 #[tokio::main]
 async fn main() {
-    let (mut msg_queue, mut state, service) = new_state::<f64>();
+    let (mut msg_queue, mut state, service) = new_state();
 
     let listener = TcpListener::bind("0.0.0.0:1940").await.unwrap();
     println!(
@@ -48,19 +49,26 @@ async fn main() {
                 state.new_session(id, res_channel);
             }
             Message::SetDims(id, dims) => state[&id].set_dims(dims),
-            Message::Goal(_id, _goal) => {
-                todo!();
+            Message::Goal(id, goal) => {
+                state[&id].set_goals(goal);
             }
             Message::SendData(id, buf) => state[&id].write(&buf),
-            Message::Train(id) => {
-                if state[&id].train().await.is_none() {
+            Message::Train(id) => match state[&id].train().await {
+                Some(result) => {
+                    info!("Trained to a fitness of {}", result.score);
+                    let instruction_response = Response::Instruction(result.instructions);
+                    state[&id]
+                        .send(instruction_response)
+                        .expect("Failed to propagate send instructions");
+                }
+                None => {
                     state[&id]
                         .send(Response::TrainError(
                             "Not all agent attributes have been set yet",
                         ))
                         .expect("Failed to send message to response channel");
                 }
-            }
+            },
             Message::Disconnection => {}
         }
     }
