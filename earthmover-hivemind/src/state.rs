@@ -6,7 +6,10 @@ use std::{
 };
 
 use earthmover_achiever::{body::Body, goals::Rewardable};
-use earthmover_simulation::{sim::backend::physics::BevyPhysicsInformedBackend, Orchestrator};
+use earthmover_simulation::{
+    sim::{backend::physics::BevyPhysicsInformedBackend, SimArgs},
+    Orchestrator,
+};
 use message::{Response, ResponseSender};
 use uuid::Uuid;
 
@@ -24,7 +27,7 @@ pub struct ServerState<REWARD: Rewardable> {
     sessions: HashMap<Uuid, Connection<REWARD>>,
 }
 
-impl<REWARD: Rewardable> ServerState<REWARD> {
+impl<REWARD: Rewardable + Copy + 'static> ServerState<REWARD> {
     /// Adds a new session to the internal sessions
     pub fn new_session(&mut self, id: Uuid, channel: ResponseSender) {
         self.sessions.insert(id, Connection::new(channel));
@@ -58,7 +61,7 @@ pub struct Connection<REWARD: Rewardable> {
     buf: Vec<f32>,
 }
 
-impl<REWARD: Rewardable> Connection<REWARD> {
+impl<REWARD: Rewardable + Copy + 'static> Connection<REWARD> {
     /// Creates a new connection with just a response channel
     pub fn new(response_channel: ResponseSender) -> Self {
         Self {
@@ -89,13 +92,20 @@ impl<REWARD: Rewardable> Connection<REWARD> {
     }
 
     /// Begins training the agent
-    pub fn train(&mut self) -> Option<()> {
+    pub async fn train(&mut self) -> Option<()> {
         if self.goal.is_none() || self.body.is_none() {
             return None;
         }
 
-        let _orchestrator: Orchestrator<BevyPhysicsInformedBackend, NUM_DIMS> =
+        let mut orchestrator: Orchestrator<BevyPhysicsInformedBackend, NUM_DIMS> =
             Orchestrator::new(BevyPhysicsInformedBackend);
+
+        let body = Body::default();
+        let job: SimArgs<REWARD, NUM_DIMS> = SimArgs::new(self.goal.unwrap(), vec![], body);
+
+        orchestrator.submit(job, NUM_SIMS);
+
+        let _best_fit = orchestrator.run().await;
 
         Some(())
     }
