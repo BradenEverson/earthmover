@@ -9,9 +9,32 @@ pub struct PositionContextualReward<const N: usize> {
     curr_reading: [f64; N],
 }
 
+impl<const N: usize> Default for PositionContextualReward<N> {
+    fn default() -> Self {
+        Self {
+            goals: [None; N],
+            curr_reading: [0.0; N],
+        }
+    }
+}
+
 impl<const N: usize> PositionContextualReward<N> {
+    /// Sets the current reading of the agent
     pub fn set_reading(&mut self, new_pos: [f64; N]) {
         self.curr_reading = new_pos
+    }
+
+    /// Updates a set of goals based on id-goal pairings
+    pub fn update(&mut self, goals: Vec<(usize, bool)>) {
+        for (idx, maximize) in goals {
+            if N < idx {
+                let goal = match maximize {
+                    true => Goal::Maximize,
+                    false => Goal::Minimize,
+                };
+                self.goals[idx] = Some(goal)
+            }
+        }
     }
 }
 

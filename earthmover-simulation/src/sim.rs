@@ -39,9 +39,9 @@ pub struct ArcSimArgs<REWARD: Rewardable + Send + Sync + 'static, const DIMS: us
 #[derive(Default, Debug)]
 pub struct SimRes {
     /// The agent's score
-    score: f64,
+    pub score: f64,
     /// The instructions to achieve this score
-    instructions: Vec<Instruction>,
+    pub instructions: Vec<Instruction>,
 }
 
 impl PartialOrd for SimRes {

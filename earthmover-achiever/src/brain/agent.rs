@@ -35,14 +35,18 @@ pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: us
     _spooky_ghost: PhantomData<STATE>,
 }
 
-impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
-    AgentSession<'agent, REWARD, STATE, BUFFER_SIZE>
+impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
+    AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>
 {
     /// Creates a new builder for an agent's session
     pub fn builder() -> Builder<'agent, REWARD, BUFFER_SIZE> {
         Builder::default()
     }
+}
 
+impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
+    AgentSession<'agent, REWARD, STATE, BUFFER_SIZE>
+{
     /// Gets the current reward of the agent session
     pub fn get_reward(&self) -> f64 {
         self.goal.to_reward()
