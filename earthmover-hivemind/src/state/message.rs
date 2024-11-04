@@ -16,7 +16,7 @@ pub type ResponseSender = tokio::sync::mpsc::UnboundedSender<Response>;
 /// All variants that a message can be, including connection requests and existing user contexts
 pub enum Message {
     /// A client initial connection
-    Connection,
+    Connection(Uuid, ResponseSender),
     /// Set the dimensionality of this simulation
     SetDims(Uuid, usize),
     /// Send a data buffer in sequences of set dimension chunks(every n elements are considered a
@@ -25,6 +25,8 @@ pub enum Message {
     /// Set the goal for the current agent (what point in the dimension to focus on and whether we
     /// want to maximize(true) or minizmize(false))
     Goal(Uuid, Vec<(usize, bool)>),
+    /// Begin training
+    Train(Uuid),
     /// Disconnect from the session
     Disconnection,
 }
@@ -35,4 +37,6 @@ pub enum Response {
     Connected(Uuid),
     /// Generated instruction for achieving a goal
     Instruction(Vec<Instruction>),
+    /// Training error
+    TrainError(&'static str),
 }

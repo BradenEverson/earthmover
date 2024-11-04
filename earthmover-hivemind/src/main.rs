@@ -1,14 +1,15 @@
 //! The server crate responsible for handling incoming data and simulating physics of the
 //! environment
 
-use earthmover_hivemind::new_state;
+
+use earthmover_hivemind::{new_state, state::message::{Message, Response}};
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
-    let (mut msg_queue, _state, service) = new_state();
+    let (mut msg_queue, mut state, service) = new_state::<f64>();
 
     let listener = TcpListener::bind("0.0.0.0:1940").await.unwrap();
     println!(
@@ -37,7 +38,22 @@ async fn main() {
 
     while let Some(msg) = msg_queue.recv().await {
         match msg {
-            _ => todo!()
+            Message::Connection(id, res_channel) => {
+                state.new_session(id, res_channel);
+            },
+            Message::SetDims(id, dims) => {
+
+            },
+            Message::Goal(id, goal) => {
+                todo!();
+            },
+            Message::SendData(id, buf) => state[&id].write(&buf),
+            Message::Train(id) => {
+                if state[&id].train().is_none() {
+                    state[&id].send(Response::TrainError("Not all agent attributes have been set yet")).expect("Failed to send message to response channel");
+                }
+            },
+            Message::Disconnection => {}
         }
     }
 }
