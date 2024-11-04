@@ -3,9 +3,16 @@
 use super::{Goal, Rewardable};
 
 /// A REWARD trait impl for when context
+#[derive(Clone, Copy)]
 pub struct PositionContextualReward<const N: usize> {
     goals: [Option<Goal>; N],
     curr_reading: [f64; N],
+}
+
+impl<const N: usize> PositionContextualReward<N> {
+    pub fn set_reading(&mut self, new_pos: [f64; N]) {
+        self.curr_reading = new_pos
+    }
 }
 
 impl<const N: usize> Rewardable for PositionContextualReward<N> {

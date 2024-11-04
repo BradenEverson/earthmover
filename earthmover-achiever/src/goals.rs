@@ -12,6 +12,7 @@ pub mod multi_dim;
 /// Reward would be an f32 to represent the reading from the flame sensor. During data collection
 /// the simulation would become aware of areas of higher flame concentration and infer to go close
 /// to these sources.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Goal {
     /// Maximize this Reward's value
     Maximize,
