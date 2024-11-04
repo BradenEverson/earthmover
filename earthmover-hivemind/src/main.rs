@@ -53,7 +53,7 @@ async fn main() {
             }
             Message::SendData(id, buf) => state[&id].write(&buf),
             Message::Train(id) => {
-                if state[&id].train().is_none() {
+                if state[&id].train().await.is_none() {
                     state[&id]
                         .send(Response::TrainError(
                             "Not all agent attributes have been set yet",
