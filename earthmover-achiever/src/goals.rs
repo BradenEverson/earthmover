@@ -1,5 +1,7 @@
 //! Defining what a goal can be
 
+pub mod multi_dim;
+
 /// Goals will be a modular abstraction over anything that we want the agent to do. It will be
 /// modular as this REWARD can be anything from a boolean to a dynamic reward type. It could be the
 /// reading from one or many peripherals. I think we should have some sort of exposed breadboard
@@ -10,33 +12,15 @@
 /// Reward would be an f32 to represent the reading from the flame sensor. During data collection
 /// the simulation would become aware of areas of higher flame concentration and infer to go close
 /// to these sources.
-pub enum Goal<REWARD: Rewardable> {
+pub enum Goal {
     /// Maximize this Reward's value
-    Maximize(REWARD),
+    Maximize,
     /// Minimize this Reward's value
-    Minimize(REWARD),
+    Minimize,
     /// A combination of goals
-    Complex(Vec<Goal<REWARD>>),
+    Complex(Vec<Goal>),
     /// No goal
     None,
-}
-
-impl<REWARD: Rewardable> Goal<REWARD> {
-    /// Evaluates a reward as its designated value
-    pub fn evaluate(&self) -> Option<f64> {
-        match self {
-            Self::Maximize(reward) | Self::Minimize(reward) => Some(reward.to_reward()),
-            Self::Complex(goals) => {
-                let mut res = 0.0;
-                for goal in goals {
-                    res += goal.evaluate()?;
-                }
-
-                Some(res)
-            }
-            Self::None => None,
-        }
-    }
 }
 
 /// Basic implementations of reward function for primitive types that make sense

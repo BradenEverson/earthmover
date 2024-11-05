@@ -35,6 +35,7 @@ pub struct TrainContext<const DIMS: usize> {
 }
 
 /// A Physics Informed Backend Runner
+#[derive(Clone, Copy)]
 pub struct BevyPhysicsInformedBackend;
 
 impl Simulation for BevyPhysicsInformedBackend {
