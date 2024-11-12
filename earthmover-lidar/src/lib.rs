@@ -7,8 +7,8 @@ const OFFSET_N: f32 = 1.608;
 /// Offset along r
 const OFFSET_R: f32 = -0.004;
 
-/// Given a lidar's roll, pitch and raw angles, alongside a set of fixed offsets from an
-/// accelerometer to a lidar, generates the appropriate Distance vector
+/// Given a lidar's roll, pitch and raw angles, alongside a set of fixed offsets from the
+/// center of rotation to a lidar, generates the appropriate Distance vector
 pub fn convert_raw_lidar_to_vector_space(
     theta_r: f32,
     theta_p: f32,
