@@ -34,19 +34,19 @@ pub fn convert_raw_lidar_to_vector_space(
     let nu_z = (p_x * r_y) - (p_y * r_x);
 
     // N1 magnitude
-    let n1 = f32::sin(theta_l);
+    let nl = f32::sin(theta_l);
 
-    let n1_x = nu_x * n1;
-    let n1_y = nu_y * n1;
-    let n1_z = nu_z * n1;
+    let nl_x = nu_x * nl;
+    let nl_y = nu_y * nl;
+    let nl_z = nu_z * nl;
 
-    let (l_x, l_y, l_z) = if theta_l != 0f32 && theta_l != 180f32 {
+    let (l_x, l_y, l_z) = if theta_l != 0f32.to_radians() && theta_l != 180f32.to_radians() {
         (
-            ((p_x * f32::cos(theta_l)) - (p_y * n1_z) + (p_z * n1_y))
+            ((p_x * f32::cos(theta_l)) - (p_y * nl_z) + (p_z * nl_y))
                 / (p_x.powi(2) + p_y.powi(2) + p_z.powi(2)),
-            ((p_y * f32::cos(theta_l)) - (p_z * n1_x) + (p_x * n1_z))
+            ((p_y * f32::cos(theta_l)) - (p_z * nl_x) + (p_x * nl_z))
                 / (p_x.powi(2) + p_y.powi(2) + p_z.powi(2)),
-            ((p_z * f32::cos(theta_l)) - (p_x * n1_y) + (p_y * n1_x))
+            ((p_z * f32::cos(theta_l)) - (p_x * nl_y) + (p_y * nl_x))
                 / (p_x.powi(2) + p_y.powi(2) + p_z.powi(2)),
         )
     } else if theta_l == 0f32 {
