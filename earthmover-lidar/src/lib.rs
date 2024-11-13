@@ -1,5 +1,7 @@
 //! Function implementation for converting raw lidar readings to a 3-space distance vector
 
+use std::f32::consts::PI;
+
 /// Offset along p
 const OFFSET_P: f32 = -0.523;
 /// Offset along Nu
@@ -40,7 +42,7 @@ pub fn convert_raw_lidar_to_vector_space(
     let nl_y = nu_y * nl;
     let nl_z = nu_z * nl;
 
-    let (l_x, l_y, l_z) = if theta_l != 0f32.to_radians() && theta_l != 180f32.to_radians() {
+    let (l_x, l_y, l_z) = if theta_l != 0f32 && theta_l != PI {
         (
             ((p_x * f32::cos(theta_l)) - (p_y * nl_z) + (p_z * nl_y))
                 / (p_x.powi(2) + p_y.powi(2) + p_z.powi(2)),
@@ -56,9 +58,9 @@ pub fn convert_raw_lidar_to_vector_space(
     };
 
     // Solve for Vector D
-    let d_x = (distance * l_x) + (OFFSET_P * r_x) + (OFFSET_R * r_x) + (OFFSET_N * nu_x);
-    let d_y = (distance * l_y) + (OFFSET_P * r_y) + (OFFSET_R * r_y) + (OFFSET_N * nu_y);
-    let d_z = (distance * l_z) + (OFFSET_P * r_z) + (OFFSET_R * r_z) + (OFFSET_N * nu_z);
+    let d_x = (distance * l_x) + (OFFSET_P * p_x) + (OFFSET_R * r_x) + (OFFSET_N * nu_x);
+    let d_y = (distance * l_y) + (OFFSET_P * p_y) + (OFFSET_R * r_y) + (OFFSET_N * nu_y);
+    let d_z = (distance * l_z) + (OFFSET_P * p_z) + (OFFSET_R * r_z) + (OFFSET_N * nu_z);
 
     (d_x, d_y, d_z)
 }
