@@ -31,7 +31,11 @@ async fn main() {
 
             let service = service.clone();
             tokio::spawn(async move {
-                if let Err(e) = http1::Builder::new().serve_connection(io, service).await {
+                if let Err(e) = http1::Builder::new()
+                    .serve_connection(io, service)
+                    .with_upgrades()
+                    .await
+                {
                     eprintln!("Error serving connection: {}", e);
                 }
             });
