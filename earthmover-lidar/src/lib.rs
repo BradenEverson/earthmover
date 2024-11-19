@@ -12,6 +12,19 @@ const OFFSET_R: f32 = -0.004;
 #[cfg(test)]
 const THRESHOLD: f32 = 0.0001;
 
+/// Takes a matrix of theta_r, theta_p, theta_l and distances and converts it into a matrix of x,
+/// y, z coordinates
+pub fn lidar_angle_matrix_to_3_space_matrix(
+    input: Vec<(f32, f32, f32, f32)>,
+) -> Vec<(f32, f32, f32)> {
+    input
+        .iter()
+        .map(|(theta_r, theta_p, theta_l, dist)| {
+            convert_raw_lidar_to_vector_space(*theta_r, *theta_p, *theta_l, *dist)
+        })
+        .collect()
+}
+
 /// Given a lidar's roll, pitch and raw angles, alongside a set of fixed offsets from the
 /// center of rotation to a lidar, generates the appropriate Distance vector
 pub fn convert_raw_lidar_to_vector_space(
