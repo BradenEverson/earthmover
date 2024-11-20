@@ -1,0 +1,12 @@
+[package]
+name = "earthmover-lidar"
+edition = "2021"
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+
+[lib]
+
+[lints]
+workspace = true

@@ -1,5 +1,5 @@
 [workspace]
-members = [ "earthmover-achiever","earthmover-hivemind", "earthmover-simulation", "rplidar-rppal"]
+members = [ "earthmover-achiever","earthmover-hivemind", "earthmover-lidar", "earthmover-simulation", "rplidar-rppal"]
 resolver = "2"
 
 [workspace.package]
