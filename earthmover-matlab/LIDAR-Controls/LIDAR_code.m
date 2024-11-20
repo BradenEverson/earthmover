@@ -21,7 +21,7 @@ angleSet = motorPositions(maxAngle,resolution); % creates a matrix of the
     % gimbal motor angles for one full cycle
 
 figure; % open plot figure
-view(161.37,30) % set view angle
+view(161.37,30) % set view angle for the plot
 
 for i=2:(resolution+3) % cycle through the matrix of angle data. 
     
