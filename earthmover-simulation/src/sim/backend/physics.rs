@@ -56,7 +56,7 @@ impl Simulation for BevyPhysicsInformedBackend {
             .add_plugins(DefaultPlugins)
             .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
             .add_systems(Startup, setup::<REWARD, DIMS>)
-            //.add_systems(Update, update::<REWARD, DIMS>)
+            .add_systems(Update, update::<REWARD, DIMS>)
             .run();
     }
 }
@@ -107,23 +107,22 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
         .spawn(PbrBundle {
             mesh: meshes.add(Mesh::from(Sphere::new(0.1))),
             material: materials.add(Color::WHITE),
-            transform: Transform::from_xyz(0.0, 0.0, 5.0), // Initial position
+            transform: Transform::from_xyz(0.0, 5.0, 0.0),
             ..default()
         })
-    .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(0.01))
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::ball(0.1))
         .insert(GravityScale(1.0))
         .insert(Restitution::coefficient(0.7))
-        .insert(Velocity::linear(Vec3::new(0.0, -0.01, 0.0)));
+        .insert(Velocity::linear(Vec3::ZERO));
 
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, -5.0, 0.5).looking_at(Vec3::ZERO, Vec3::Z),
+        transform: Transform::from_xyz(0.0, 5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 
-
     commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Z),
+        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
