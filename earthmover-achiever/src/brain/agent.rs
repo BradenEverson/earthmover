@@ -54,8 +54,8 @@ impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
     }
 }
 
-impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
-    AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>
+impl<REWARD: Rewardable, const BUFFER_SIZE: usize>
+    AgentSession<'_, REWARD, Untrained, BUFFER_SIZE>
 {
     /// Adds a slice of data to the buffer, if that slice is too large `None` is returned
     pub fn add_data(&mut self, buf: &[f32]) -> Option<()> {
@@ -63,9 +63,7 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
     }
 }
 
-impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
-    AgentSession<'agent, REWARD, InReview, BUFFER_SIZE>
-{
+impl<REWARD: Rewardable, const BUFFER_SIZE: usize> AgentSession<'_, REWARD, InReview, BUFFER_SIZE> {
     /// Gets the directions of a newly trained Agent
     pub fn act(&mut self) -> Result<()> {
         if let Some(instructions) = &self.directions {
@@ -93,9 +91,7 @@ pub struct Builder<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> {
     body: Option<&'agent mut Body>,
 }
 
-impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize> Default
-    for Builder<'agent, REWARD, BUFFER_SIZE>
-{
+impl<REWARD: Rewardable, const BUFFER_SIZE: usize> Default for Builder<'_, REWARD, BUFFER_SIZE> {
     fn default() -> Self {
         Self {
             goal: None,
