@@ -13,7 +13,8 @@ use bevy::{
     utils::default,
     DefaultPlugins,
 };
-use bevy_rapier3d::prelude::Collider;
+use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
+use bevy_rapier3d::prelude::{Collider, GravityScale, Restitution, RigidBody, Velocity};
 use earthmover_achiever::goals::Rewardable;
 use std::collections::HashMap;
 use tokio::sync::mpsc::UnboundedSender;
@@ -53,7 +54,9 @@ impl Simulation for BevyPhysicsInformedBackend {
             .insert_resource(ArcSimArgs(args))
             .insert_resource(TrainContext::<DIMS>::default())
             .add_plugins(DefaultPlugins)
+            .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
             .add_systems(Startup, setup::<REWARD, DIMS>)
+            .add_systems(Update, update::<REWARD, DIMS>)
             .run();
     }
 }
@@ -89,23 +92,42 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
                 PbrBundle {
                     mesh: mesh_handle.clone(),
                     material: material_handle,
-                    transform: Transform::from_translation(Vec3::new(point[0], point[1], point[2])),
+                    transform: Transform::from_xyz(point[0], point[1], point[2]),
                     ..default()
                 },
                 Collider::cuboid(0.01, 0.01, 0.01),
+                RigidBody::Fixed,
             )
         })
         .collect();
 
     commands.spawn_batch(points);
 
+    commands
+        .spawn(PbrBundle {
+            mesh: meshes.add(Mesh::from(Sphere::new(0.1))),
+            material: materials.add(Color::WHITE),
+            transform: Transform::from_xyz(0.0, 5.0, 0.0),
+            ..default()
+        })
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::ball(0.1))
+        .insert(GravityScale(1.0))
+        .insert(Restitution::coefficient(0.7))
+        .insert(Velocity::linear(Vec3::ZERO));
+
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, -2.0, 1.0).looking_at(Vec3::ZERO, Vec3::Z),
+        transform: Transform::from_xyz(0.0, 5.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 
     commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Z),
+        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
+
+#[allow(unused_attributes)]
+#[allow(elided_lifetimes_in_paths)]
+/// Sets up the Bevy simulation world with respect to the points provided
+fn update<REWARD: Rewardable, const DIMS: usize>() {}
