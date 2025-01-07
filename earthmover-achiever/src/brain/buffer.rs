@@ -45,6 +45,10 @@ impl<const BUFFER_SIZE: usize> DataBuffer<BUFFER_SIZE> {
         }
     }
 
+    pub fn export(&self) -> Vec<f32> {
+        self.data[0..(*self.marker)].to_vec()
+    }
+
     /// Returns a mutable reference to the current byte, then increments the marker
     fn get(&mut self) -> Option<&mut f32> {
         let mut_byte = &mut self.data[*self.marker];

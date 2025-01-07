@@ -65,6 +65,13 @@ impl<REWARD: Rewardable, const BUFFER_SIZE: usize>
     pub fn add_data(&mut self, buf: &[f32]) -> Option<()> {
         self.buffer.add_data(buf)
     }
+
+    pub fn export(&mut self) -> Vec<f32> {
+        let res = self.buffer.export();
+        self.buffer = DataBuffer::default();
+
+        res
+    }
 }
 
 impl<REWARD: Rewardable, const BUFFER_SIZE: usize> AgentSession<'_, REWARD, InReview, BUFFER_SIZE> {

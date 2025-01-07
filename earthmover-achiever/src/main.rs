@@ -1,9 +1,11 @@
 //! The agent's application cycle
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use clap::Parser;
 use earthmover_achiever::brain::agent::Untrained;
+use earthmover_achiever::communication::read_packet;
 use earthmover_achiever::goals::multi_dim::PositionContextualReward;
 use earthmover_achiever::goals::Rewardable;
 use earthmover_achiever::protocol::{AhtpMessage, AhtpResponse};
@@ -52,7 +54,7 @@ pub async fn main() {
     let _threshold = args.threshold;
     let server_to = args.server.unwrap_or("0.0.0.0:1940".into());
 
-    let _agent = AgentSession::<_, Untrained, 100_000>::builder()
+    let mut agent = AgentSession::<_, Untrained, 100_000>::builder()
         .with_body(&mut body)
         .with_goal(goals)
         .build()
@@ -99,8 +101,46 @@ pub async fn main() {
         .expect("Failed to send session id to hivemind socket");
 
     let _conditions_reached = false;
+
     loop {
-        // Collect all data until buffer is full
+        // Register x,y,z coords (as bytes) to point metadata
+        let mut point_register: HashMap<Vec<u8>, PointBuilder<DIMS>> = HashMap::new();
+
+        let mut is_full = Some(());
+
+        while let Some(()) = is_full {
+            // Collect all data until buffer is full
+            let (_packet, data) = read_packet();
+
+            agent.add_data(&[0f32]);
+
+            // read first 12 bytes as 3 f32s for x, y, z
+            let xyz = data[0..12].to_vec();
+            let _rest = &data[12..];
+
+            let point_register = point_register.entry(xyz).or_default();
+
+            // match packet {
+            //     _ => todo!("Based on packet type, register points in the point register from the rest of the data")
+            // }
+
+            if let Some(data) = point_register.export() {
+                is_full = agent.add_data(&data);
+            }
+        }
+
+        let buf = agent
+            .export()
+            .iter()
+            .flat_map(|float| float.to_be_bytes())
+            .collect();
+
+        write
+            .send(Message::Binary(buf))
+            .await
+            .expect("Failed to send buffer");
+
+        // Tell server to begin training
 
         // Check assess fitness, if past threshold set conditions_reached to true and break
 
@@ -108,5 +148,41 @@ pub async fn main() {
 
         // Perform instructions
         std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+}
+
+/// Helper struct for bundling a point's information before sending it to the hivemind server
+#[derive(Clone, Copy)]
+pub struct PointBuilder<const DIM: usize>([Option<f32>; DIM]);
+
+impl<const DIM: usize> Default for PointBuilder<DIM> {
+    fn default() -> Self {
+        Self([None; DIM])
+    }
+}
+
+impl<const DIM: usize> PointBuilder<DIM> {
+    pub fn is_ready(&self) -> bool {
+        self.0.iter().filter(|val| val.is_none()).count() != 0
+    }
+
+    pub fn reset(&mut self) {
+        self.0 = [None; DIM];
+    }
+
+    pub fn set(&mut self, dim: usize, val: f32) {
+        self.0[dim] = Some(val)
+    }
+
+    pub fn export(&self) -> Option<[f32; DIM]> {
+        let mut out = [0f32; DIM];
+        if !self.is_ready() {
+            return None;
+        }
+        for (place, val) in out.iter_mut().zip(self.0.iter()) {
+            *place = val.unwrap()
+        }
+
+        Some(out)
     }
 }

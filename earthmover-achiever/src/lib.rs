@@ -6,5 +6,6 @@ compile_error! {"Jetson Nano and Raspberry Pi cannot both be targetted by the sa
 
 pub mod body;
 pub mod brain;
+pub mod communication;
 pub mod goals;
 pub mod protocol;

@@ -17,6 +17,7 @@ tokio-tungstenite = { workspace = true }
 urlencoding = { workspace = true }
 uuid = { workspace = true }
 rppal = { workspace = true, optional = true }
+deku = "0.18.1"
 
 [features]
 default = []
