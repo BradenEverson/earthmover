@@ -22,8 +22,8 @@ hyper = { version = "1.4.1", features = ["full"] }
 hyper-tungstenite = "0.14.0"
 hyper-util = { version = "0.1.6", features = ["full", "tokio"] }
 uuid = { version = "1.11.0", features = ["v4", "serde"] }
-bevy = "0.14.2"
-bevy_rapier3d = "0.27.0"
+bevy = "0.15.0"
+bevy_rapier3d = "0.28.0"
 futures = "0.3.30"
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"

@@ -15,6 +15,8 @@ pub struct SimArgs<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize
     pub data: Vec<[f32; DIMS]>,
     /// The agent's body
     pub body: Body,
+    /// The URDF file path
+    pub urdf: String,
 }
 
 impl<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize> SimArgs<REWARD, DIMS> {
@@ -24,8 +26,18 @@ impl<REWARD: Rewardable + Send + Sync + 'static, const DIMS: usize> SimArgs<REWA
     }
 
     /// Creates a new SimArgs from raw parts
-    pub fn new(reward: REWARD, data: Vec<[f32; DIMS]>, body: Body) -> Self {
-        Self { reward, data, body }
+    pub fn new(
+        reward: REWARD,
+        data: Vec<[f32; DIMS]>,
+        body: Body,
+        urdf: impl Into<String>,
+    ) -> Self {
+        Self {
+            reward,
+            data,
+            body,
+            urdf: urdf.into(),
+        }
     }
 }
 

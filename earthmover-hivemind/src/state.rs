@@ -99,7 +99,7 @@ impl Connection {
             Orchestrator::new(BevyPhysicsInformedBackend);
 
         let body = Body::default();
-        let job: SimArgs<_, NUM_DIMS> = SimArgs::new(self.goal, vec![], body);
+        let job: SimArgs<_, NUM_DIMS> = SimArgs::new(self.goal, vec![], body, "body.urdf");
 
         orchestrator.submit(job, NUM_SIMS);
 

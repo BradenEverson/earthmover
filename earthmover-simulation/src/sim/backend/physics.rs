@@ -8,9 +8,8 @@ use bevy::{
     app::{App, Startup},
     asset::Assets,
     math::Vec3,
-    pbr::{DirectionalLightBundle, PbrBundle, StandardMaterial},
-    prelude::{Camera3dBundle, Commands, Cuboid, Mesh, ResMut, Resource, Transform},
-    utils::default,
+    pbr::StandardMaterial,
+    prelude::{Commands, Cuboid, Mesh, ResMut, Resource, Transform},
     DefaultPlugins,
 };
 use bevy_rapier3d::plugin::{NoUserData, RapierPhysicsPlugin};
@@ -89,12 +88,9 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
                 .clone();
 
             (
-                PbrBundle {
-                    mesh: mesh_handle.clone(),
-                    material: material_handle,
-                    transform: Transform::from_xyz(point[0], point[1], point[2]),
-                    ..default()
-                },
+                Mesh3d(mesh_handle.clone()),
+                MeshMaterial3d(material_handle),
+                Transform::from_xyz(point[0], point[1], point[2]),
                 Collider::cuboid(0.01, 0.01, 0.01),
                 RigidBody::Fixed,
             )
@@ -104,27 +100,26 @@ fn setup<REWARD: Rewardable, const DIMS: usize>(
     commands.spawn_batch(points);
 
     commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(Sphere::new(0.1))),
-            material: materials.add(Color::WHITE),
-            transform: Transform::from_xyz(0.0, 5.0, 0.0),
-            ..default()
-        })
+        .spawn((
+            Mesh3d(meshes.add(Mesh::from(Sphere::new(0.1)))),
+            MeshMaterial3d(materials.add(Color::WHITE)),
+            Transform::from_xyz(0.0, 5.0, 0.0),
+        ))
         .insert(RigidBody::Dynamic)
         .insert(Collider::ball(0.1))
         .insert(GravityScale(1.0))
         .insert(Restitution::coefficient(0.7))
         .insert(Velocity::linear(Vec3::ZERO));
 
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 2.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(0.0, 2.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
 
-    commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    commands.spawn((
+        DirectionalLight::default(),
+        Transform::from_xyz(3.0, 3.0, 3.0).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
 }
 
 #[allow(unused_attributes)]
