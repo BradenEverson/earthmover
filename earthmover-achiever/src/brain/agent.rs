@@ -35,14 +35,18 @@ pub struct AgentSession<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: us
     _spooky_ghost: PhantomData<STATE>,
 }
 
-impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
-    AgentSession<'agent, REWARD, STATE, BUFFER_SIZE>
+impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
+    AgentSession<'agent, REWARD, Untrained, BUFFER_SIZE>
 {
     /// Creates a new builder for an agent's session
     pub fn builder() -> Builder<'agent, REWARD, BUFFER_SIZE> {
         Builder::default()
     }
+}
 
+impl<REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
+    AgentSession<'_, REWARD, STATE, BUFFER_SIZE>
+{
     /// Gets the current reward of the agent session
     pub fn get_reward(&self) -> f64 {
         self.goal.to_reward()
@@ -60,6 +64,13 @@ impl<REWARD: Rewardable, const BUFFER_SIZE: usize>
     /// Adds a slice of data to the buffer, if that slice is too large `None` is returned
     pub fn add_data(&mut self, buf: &[f32]) -> Option<()> {
         self.buffer.add_data(buf)
+    }
+
+    pub fn export(&mut self) -> Vec<f32> {
+        let res = self.buffer.export();
+        self.buffer = DataBuffer::default();
+
+        res
     }
 }
 
