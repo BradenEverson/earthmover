@@ -44,8 +44,8 @@ impl<'agent, REWARD: Rewardable, const BUFFER_SIZE: usize>
     }
 }
 
-impl<'agent, REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
-    AgentSession<'agent, REWARD, STATE, BUFFER_SIZE>
+impl<REWARD: Rewardable, STATE, const BUFFER_SIZE: usize>
+    AgentSession<'_, REWARD, STATE, BUFFER_SIZE>
 {
     /// Gets the current reward of the agent session
     pub fn get_reward(&self) -> f64 {
