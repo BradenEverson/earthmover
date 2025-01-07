@@ -25,7 +25,7 @@ impl Goal {
     pub fn match_against(&self, val: f64, ceiling: f64) -> f64 {
         match *self {
             Self::Maximize => -((ceiling - val).abs()),
-            Self::Minimize => (ceiling - val).abs()
+            Self::Minimize => (ceiling - val).abs(),
         }
     }
 }
